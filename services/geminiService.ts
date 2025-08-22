@@ -1,12 +1,6 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import type { ProductData, ImageFile } from '../types';
 
-if (!process.env.API_KEY) {
-  throw new Error("API_KEY environment variable not set");
-}
-
-const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
-
 const productSchema = {
   type: Type.OBJECT,
   properties: {
@@ -165,8 +159,15 @@ ${hasImage ? finalInstruction_withImage : finalInstruction_withoutImage}
 
 export const generateProductContent = async (
   productName: string,
-  productImage: ImageFile | null
+  productImage: ImageFile | null,
+  apiKey: string
 ): Promise<ProductData> => {
+  if (!apiKey) {
+    throw new Error("کلید API گوگل ارائه نشده است. لطفاً کلید خود را وارد کنید.");
+  }
+  
+  const ai = new GoogleGenAI({ apiKey });
+
   try {
     const hasImage = !!productImage;
     const prompt = createPrompt(productName, hasImage);
@@ -208,6 +209,6 @@ export const generateProductContent = async (
 
   } catch (error) {
     console.error("Error calling Gemini API:", error);
-    throw new Error("خطا در ارتباط با سرویس هوش مصنوعی. لطفاً دوباره تلاش کنید.");
+    throw new Error("خطا در ارتباط با سرویس هوش مصنوعی. لطفاً کلید API و اتصال اینترنت خود را بررسی کنید.");
   }
 };
