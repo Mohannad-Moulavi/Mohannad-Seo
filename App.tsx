@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ProductData, ImageFile } from './types';
 import { generateProductContent } from './services/geminiService';
 import Loader from './components/Loader';
@@ -154,19 +154,13 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
 
 // --- Main App Component ---
 
-const API_KEY_STORAGE_KEY = 'gemini-api-key';
-
 function App() {
   const [productName, setProductName] = useState<string>('');
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem(API_KEY_STORAGE_KEY) || '');
+  const [apiKey, setApiKey] = useState<string>('');
   const [productImage, setProductImage] = useState<ImageFile | null>(null);
   const [generatedContent, setGeneratedContent] = useState<ProductData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
-
-  useEffect(() => {
-    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-  }, [apiKey]);
 
   const handleSubmit = useCallback(async () => {
     if (!productName || !apiKey) {
