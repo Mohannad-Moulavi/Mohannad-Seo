@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ProductData, ImageFile } from './types';
 import { generateProductContent } from './services/geminiService';
 import Loader from './components/Loader';
@@ -131,13 +131,15 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
         <div className="bg-gray-800 p-4 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-2">
                 <h3 className="font-bold text-lg text-blue-300">{label}</h3>
-                <button
-                    onClick={handleCopy}
-                    className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-md transition-colors text-sm"
-                >
-                    {copied ? <CheckIcon /> : <CopyIcon />}
-                    <span>{copied ? 'کپی شد!' : 'کپی'}</span>
-                </button>
+                {copyText && (
+                    <button
+                        onClick={handleCopy}
+                        className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-md transition-colors text-sm"
+                    >
+                        {copied ? <CheckIcon /> : <CopyIcon />}
+                        <span>{copied ? 'کپی شد!' : 'کپی'}</span>
+                    </button>
+                )}
             </div>
             <div className="text-gray-300 whitespace-pre-wrap font-sans">
                 {isHtml && typeof content === 'string' ? (
@@ -150,7 +152,6 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
         </div>
     );
 };
-
 
 // --- Main App Component ---
 
@@ -166,6 +167,7 @@ function App() {
       setError('لطفاً نام محصول را وارد کنید.');
       return;
     }
+    
     setError(null);
     setIsLoading(true);
     setGeneratedContent(null);
@@ -258,18 +260,13 @@ function App() {
                     </div>
 
                     <OutputSection label="توضیحات کامل محصول" content={generatedContent.fullDescription} isHtml={true} copyText={generatedContent.fullDescription} />
-                    <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} />
-                    <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} />
-                    <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} />
-                    <OutputSection label="نامک (Slug)" content={generatedContent.slug} />
-                    <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} />
+                    <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} copyText={generatedContent.shortDescription} />
+                    <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} copyText={generatedContent.focusKeyword} />
+                    <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} copyText={generatedContent.seoTitle} />
+                    <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
+                    <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} copyText={generatedContent.metaDescription} />
                     
-                    <OutputSection label="تجزیه و تحلیل سئو برتر (Advanced SEO Analysis)" content={null} copyText={generatedContent.keyphraseSynonyms.join(', ')}>
-                        <div className="mt-2">
-                            <span className="font-semibold text-gray-400">عبارات مترادف کلیدی: </span>
-                            <p className="inline">{generatedContent.keyphraseSynonyms.join('، ')}</p>
-                        </div>
-                    </OutputSection>
+                    <OutputSection label="عبارات کلیدی مترادف" content={generatedContent.keyphraseSynonyms.join('، ')} copyText={generatedContent.keyphraseSynonyms.join(', ')} />
                 </div>
               )}
             </div>
