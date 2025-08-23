@@ -154,23 +154,16 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
 
 // --- Main App Component ---
 
-const API_KEY_STORAGE_KEY = 'gemini-api-key';
-
 function App() {
   const [productName, setProductName] = useState<string>('');
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem(API_KEY_STORAGE_KEY) || '');
   const [productImage, setProductImage] = useState<ImageFile | null>(null);
   const [generatedContent, setGeneratedContent] = useState<ProductData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-  }, [apiKey]);
-
   const handleSubmit = useCallback(async () => {
-    if (!productName || !apiKey) {
-      setError('لطفاً نام محصول و کلید API را وارد کنید.');
+    if (!productName) {
+      setError('لطفاً نام محصول را وارد کنید.');
       return;
     }
     setError(null);
@@ -178,7 +171,7 @@ function App() {
     setGeneratedContent(null);
 
     try {
-      const content = await generateProductContent(productName, productImage, apiKey);
+      const content = await generateProductContent(productName, productImage);
       setGeneratedContent(content);
     } catch (err) {
       if (err instanceof Error) {
@@ -189,7 +182,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [productName, productImage, apiKey]);
+  }, [productName, productImage]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
@@ -208,19 +201,6 @@ function App() {
           <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700">
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-200">۱. اطلاعات محصول را وارد کنید</h2>
             <div className="space-y-6">
-               <div>
-                <label htmlFor="api-key" className="block text-sm font-medium text-gray-300 mb-2">
-                  کلید API گوگل
-                </label>
-                <input
-                  type="password"
-                  id="api-key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="کلید خود را اینجا وارد کنید"
-                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                />
-              </div>
               <div>
                 <label htmlFor="product-name" className="block text-sm font-medium text-gray-300 mb-2">نام محصول (یا یک توصیف کلی)</label>
                 <input
@@ -236,7 +216,7 @@ function App() {
               
               <button
                 onClick={handleSubmit}
-                disabled={isLoading || !productName || !apiKey}
+                disabled={isLoading || !productName}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center transition-all duration-300 transform hover:scale-105"
               >
                 {isLoading ? <Loader /> : '✨ تولید محتوای بهینه'}
