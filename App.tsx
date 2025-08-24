@@ -244,13 +244,22 @@ function App() {
               )}
               {generatedContent && (
                 <div className="space-y-4 animate-fade-in">
+                    <OutputSection
+                        label="نام محصول"
+                        content={
+                            <div>
+                                <p className="font-bold text-xl text-white">{generatedContent.correctedProductName}</p>
+                                <p className="text-gray-400">{generatedContent.englishProductName}</p>
+                            </div>
+                        }
+                        copyText={`${generatedContent.correctedProductName}\n${generatedContent.englishProductName}`}
+                    />
                     <OutputSection label="توضیحات کامل محصول" content={generatedContent.fullDescription} isHtml={true} copyText={generatedContent.fullDescription} />
-                    <OutputSection label="توضیحات کوتاه" content={generatedContent.shortDescription} copyText={generatedContent.shortDescription} />
                     <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} copyText={generatedContent.focusKeyword} />
                     <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} copyText={generatedContent.seoTitle} />
                     <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
                     <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} copyText={generatedContent.metaDescription} />
-                    <OutputSection label="تجزیه و تحلیل سئو برتر (Advanced SEO Analysis)" content={generatedContent.keyphraseSynonyms.join('، ')} copyText={generatedContent.keyphraseSynonyms.join(', ')} />
+                    <OutputSection label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)" content={generatedContent.keyphraseSynonyms.join('، ')} copyText={generatedContent.keyphraseSynonyms.join(', ')} />
                 </div>
               )}
             </div>
