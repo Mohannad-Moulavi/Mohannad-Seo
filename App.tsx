@@ -6,7 +6,7 @@ import Loader from './components/Loader';
 // --- Helper Components (Defined outside App to prevent re-creation on re-renders) ---
 
 const UploadIcon: React.FC = () => (
-  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg xmlns="http://www.w.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
   </svg>
 );
@@ -153,6 +153,24 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
     );
 };
 
+const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ title, items }) => (
+    <div>
+        <h4 className="font-semibold text-gray-400">{title}</h4>
+        {items && items.length > 0 ? (
+             <div className="flex flex-wrap gap-2 mt-1">
+                {items.map((item, index) => (
+                    <span key={index} className="bg-gray-700/50 text-gray-200 px-2 py-1 rounded text-xs">
+                        {item}
+                    </span>
+                ))}
+            </div>
+        ) : (
+            <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
+        )}
+    </div>
+);
+
+
 // --- Main App Component ---
 
 function App() {
@@ -244,22 +262,54 @@ function App() {
               )}
               {generatedContent && (
                 <div className="space-y-4 animate-fade-in">
+                    {/* 1. Product Name */}
                     <OutputSection
                         label="نام محصول"
                         content={
-                            <div>
-                                <p className="font-bold text-xl text-white">{generatedContent.correctedProductName}</p>
-                                <p className="text-gray-400">{generatedContent.englishProductName}</p>
-                            </div>
+                            <p>
+                                <strong className="font-bold text-xl text-white">{generatedContent.correctedProductName}</strong>
+                                <span className="block text-gray-400">{generatedContent.englishProductName}</span>
+                            </p>
                         }
                         copyText={`${generatedContent.correctedProductName}\n${generatedContent.englishProductName}`}
                     />
+                    {/* 2. Full Description */}
                     <OutputSection label="توضیحات کامل محصول" content={generatedContent.fullDescription} isHtml={true} copyText={generatedContent.fullDescription} />
+                    {/* 3. Short Description */}
+                     <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} copyText={generatedContent.shortDescription} />
+                    {/* 4. Focus Keyphrase */}
                     <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} copyText={generatedContent.focusKeyword} />
+                    {/* 5. SEO Title */}
                     <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} copyText={generatedContent.seoTitle} />
+                    {/* 6. Slug */}
                     <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
+                    {/* 7. Meta Description */}
                     <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} copyText={generatedContent.metaDescription} />
-                    <OutputSection label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)" content={generatedContent.keyphraseSynonyms.join('، ')} copyText={generatedContent.keyphraseSynonyms.join(', ')} />
+                    {/* 8. Advanced SEO Analysis */}
+                    <OutputSection 
+                        label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)"
+                        content={
+                            <div className="space-y-3 text-sm">
+                                <AdvancedAnalysisItem title="Synonyms (مترادف کلیدواژه)" items={generatedContent.advancedSeoAnalysis.keyphraseSynonyms} />
+                                <AdvancedAnalysisItem title="LSI Keywords (کلیدواژه‌های معنایی)" items={generatedContent.advancedSeoAnalysis.lsiKeywords} />
+                                <AdvancedAnalysisItem title="Long-tail Keywords (عبارت‌های دم‌بلند)" items={generatedContent.advancedSeoAnalysis.longTailKeywords} />
+                                <AdvancedAnalysisItem title="Semantic Entities (موجودیت‌های معنایی)" items={generatedContent.advancedSeoAnalysis.semanticEntities} />
+                                <div>
+                                    <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
+                                    <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{generatedContent.advancedSeoAnalysis.searchIntent}</p>
+                                </div>
+                                <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={generatedContent.advancedSeoAnalysis.internalLinkingSuggestions} />
+                            </div>
+                        }
+                        copyText={
+                            `Synonyms: ${generatedContent.advancedSeoAnalysis.keyphraseSynonyms.join(', ')}\n` +
+                            `LSI Keywords: ${generatedContent.advancedSeoAnalysis.lsiKeywords.join(', ')}\n` +
+                            `Long-tail Keywords: ${generatedContent.advancedSeoAnalysis.longTailKeywords.join(', ')}\n` +
+                            `Semantic Entities: ${generatedContent.advancedSeoAnalysis.semanticEntities.join(', ')}\n` +
+                            `Search Intent: ${generatedContent.advancedSeoAnalysis.searchIntent}\n` +
+                            `Internal Linking Suggestions: ${generatedContent.advancedSeoAnalysis.internalLinkingSuggestions.join(', ')}`
+                        }
+                    />
                 </div>
               )}
             </div>
