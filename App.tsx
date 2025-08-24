@@ -167,6 +167,67 @@ const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ titl
 );
 
 
+const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }> = ({ analysis }) => {
+    const [activeTab, setActiveTab] = useState('keywords');
+
+    const tabs = {
+        keywords: 'کلیدواژه‌ها',
+        intent: 'هدف جستجو',
+        linking: 'لینک‌سازی داخلی',
+    };
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'keywords':
+                return (
+                    <div className="space-y-3">
+                        <AdvancedAnalysisItem title="Synonyms (مترادف کلیدواژه)" items={analysis.keyphraseSynonyms} />
+                        <AdvancedAnalysisItem title="LSI Keywords (کلیدواژه‌های معنایی)" items={analysis.lsiKeywords} />
+                        <AdvancedAnalysisItem title="Long-tail Keywords (عبارت‌های دم‌بلند)" items={analysis.longTailKeywords} />
+                        <AdvancedAnalysisItem title="Semantic Entities (موجودیت‌های معنایی)" items={analysis.semanticEntities} />
+                    </div>
+                );
+            case 'intent':
+                return (
+                    <div>
+                        <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
+                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{analysis.searchIntent}</p>
+                    </div>
+                );
+            case 'linking':
+                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={analysis.internalLinkingSuggestions} />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div>
+            <div className="flex border-b border-gray-700 mb-3">
+                {Object.entries(tabs).map(([key, title]) => (
+                    <button
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                        className={`-mb-px px-4 py-2 text-sm font-medium transition-colors focus:outline-none ${
+                            activeTab === key
+                                ? 'border-b-2 border-blue-400 text-white'
+                                : 'border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-500'
+                        }`}
+                        aria-pressed={activeTab === key}
+                    >
+                        {title}
+                    </button>
+                ))}
+            </div>
+            {/* The key attribute forces React to re-mount the component, triggering the animation */}
+            <div key={activeTab} className="pt-2 text-sm animate-fade-in-fast">
+                {renderContent()}
+            </div>
+        </div>
+    );
+};
+
+
 // --- Main App Component ---
 
 function App() {
@@ -286,19 +347,7 @@ function App() {
                     {/* 9. Advanced SEO Analysis */}
                     <OutputSection 
                         label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)"
-                        content={
-                            <div className="space-y-3 text-sm">
-                                <AdvancedAnalysisItem title="Synonyms (مترادف کلیدواژه)" items={generatedContent.advancedSeoAnalysis.keyphraseSynonyms} />
-                                <AdvancedAnalysisItem title="LSI Keywords (کلیدواژه‌های معنایی)" items={generatedContent.advancedSeoAnalysis.lsiKeywords} />
-                                <AdvancedAnalysisItem title="Long-tail Keywords (عبارت‌های دم‌بلند)" items={generatedContent.advancedSeoAnalysis.longTailKeywords} />
-                                <AdvancedAnalysisItem title="Semantic Entities (موجودیت‌های معنایی)" items={generatedContent.advancedSeoAnalysis.semanticEntities} />
-                                <div>
-                                    <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
-                                    <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{generatedContent.advancedSeoAnalysis.searchIntent}</p>
-                                </div>
-                                <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={generatedContent.advancedSeoAnalysis.internalLinkingSuggestions} />
-                            </div>
-                        }
+                        content={<AdvancedSeoTabs analysis={generatedContent.advancedSeoAnalysis} />}
                         copyText={
                             `Synonyms: ${generatedContent.advancedSeoAnalysis.keyphraseSynonyms.join(', ')}\n` +
                             `LSI Keywords: ${generatedContent.advancedSeoAnalysis.lsiKeywords.join(', ')}\n` +
@@ -360,6 +409,13 @@ function App() {
           }
           .animate-fade-in {
             animation: fade-in 0.5s ease-out forwards;
+          }
+          @keyframes fade-in-fast {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in-fast {
+            animation: fade-in-fast 0.3s ease-out forwards;
           }
       `}</style>
     </div>
