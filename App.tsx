@@ -243,23 +243,9 @@ function App() {
                  </div>
               )}
               {generatedContent && (
-                <div className="space-y-4">
-                    {/* Corrected Product Name Row */}
-                    <div className="bg-gray-800 p-4 rounded-lg shadow-md animate-fade-in border border-teal-500/30">
-                        <h3 className="font-bold text-lg text-teal-300 mb-3">🏷️ نام محصول شناسایی شده</h3>
-                        <div className="space-y-3 text-gray-300">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <span className="font-semibold text-gray-400 mb-1 sm:mb-0">نام فارسی (اصلاح شده):</span>
-                                <code className="bg-gray-700 px-3 py-1 rounded-md text-teal-300 font-bold">{generatedContent.correctedProductName}</code>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <span className="font-semibold text-gray-400 mb-1 sm:mb-0">نام انگلیسی:</span>
-                                <code className="bg-gray-700 px-3 py-1 rounded-md text-teal-300 font-bold" dir="ltr">{generatedContent.englishProductName}</code>
-                            </div>
-                        </div>
-                    </div>
-
+                <div className="space-y-4 animate-fade-in">
                     <OutputSection label="توضیحات کامل محصول" content={generatedContent.fullDescription} isHtml={true} copyText={generatedContent.fullDescription} />
+                    <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} copyText={generatedContent.shortDescription} />
                     <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} copyText={generatedContent.focusKeyword} />
                     <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} copyText={generatedContent.seoTitle} />
                     <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
@@ -300,6 +286,14 @@ function App() {
           .prose p, .prose ul {
             margin-bottom: 0.75rem;
           }
+           .prose > :first-child strong {
+             display: inline;
+             font-size: 1.25rem;
+             color: #63b3ed; /* blue-400 */
+           }
+           .prose > :first-child {
+            margin-top: 0;
+           }
           .prose ul {
             padding-right: 1.5rem;
           }
