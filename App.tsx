@@ -178,15 +178,27 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
 
     const renderContent = () => {
         switch (activeTab) {
-            case 'keywords':
+            case 'keywords': {
+                const allKeywords = [
+                    ...(analysis.keyphraseSynonyms || []),
+                    ...(analysis.lsiKeywords || []),
+                    ...(analysis.longTailKeywords || []),
+                    ...(analysis.semanticEntities || []),
+                ].filter(Boolean);
+
                 return (
-                    <div className="space-y-3">
-                        <AdvancedAnalysisItem title="Synonyms (مترادف کلیدواژه)" items={analysis.keyphraseSynonyms} />
-                        <AdvancedAnalysisItem title="LSI Keywords (کلیدواژه‌های معنایی)" items={analysis.lsiKeywords} />
-                        <AdvancedAnalysisItem title="Long-tail Keywords (عبارت‌های دم‌بلند)" items={analysis.longTailKeywords} />
-                        <AdvancedAnalysisItem title="Semantic Entities (موجودیت‌های معنایی)" items={analysis.semanticEntities} />
+                     <div>
+                        <h4 className="font-semibold text-gray-400 mb-2">کلیدواژه های مرتبط</h4>
+                        {allKeywords.length > 0 ? (
+                            <p className="text-gray-200 bg-gray-700/50 p-3 rounded-md leading-relaxed">
+                                {allKeywords.join('، ')}
+                            </p>
+                        ) : (
+                            <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
+                        )}
                     </div>
                 );
+            }
             case 'intent':
                 return (
                     <div>
@@ -349,10 +361,12 @@ function App() {
                         label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)"
                         content={<AdvancedSeoTabs analysis={generatedContent.advancedSeoAnalysis} />}
                         copyText={
-                            `Synonyms: ${generatedContent.advancedSeoAnalysis.keyphraseSynonyms.join(', ')}\n` +
-                            `LSI Keywords: ${generatedContent.advancedSeoAnalysis.lsiKeywords.join(', ')}\n` +
-                            `Long-tail Keywords: ${generatedContent.advancedSeoAnalysis.longTailKeywords.join(', ')}\n` +
-                            `Semantic Entities: ${generatedContent.advancedSeoAnalysis.semanticEntities.join(', ')}\n` +
+                           `Keywords: ${[
+                                ...(generatedContent.advancedSeoAnalysis.keyphraseSynonyms || []),
+                                ...(generatedContent.advancedSeoAnalysis.lsiKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis.longTailKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis.semanticEntities || []),
+                            ].filter(Boolean).join(', ')}\n` +
                             `Search Intent: ${generatedContent.advancedSeoAnalysis.searchIntent}\n` +
                             `Internal Linking Suggestions: ${generatedContent.advancedSeoAnalysis.internalLinkingSuggestions.join(', ')}`
                         }
