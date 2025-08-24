@@ -95,9 +95,13 @@ const productSchema = {
       type: Type.STRING,
       description: "توضیحات متا جذاب و سئو شده (بین ۱۴۰ تا ۱۵۰ کاراکتر).",
     },
+    altImageText: {
+      type: Type.STRING,
+      description: "متن جایگزین (Alt Text) برای تصویر محصول. باید یک جمله کوتاه توصیفی (حداکثر ۱۰-۱۲ کلمه) شامل کلیدواژه کانونی و نام کامل محصول باشد."
+    },
     advancedSeoAnalysis: advancedSeoAnalysisSchema,
   },
-  required: ["correctedProductName", "englishProductName", "fullDescription", "shortDescription", "seoTitle", "slug", "focusKeyword", "metaDescription", "advancedSeoAnalysis"],
+  required: ["correctedProductName", "englishProductName", "fullDescription", "shortDescription", "seoTitle", "slug", "focusKeyword", "metaDescription", "altImageText", "advancedSeoAnalysis"],
 };
 
 
@@ -149,7 +153,12 @@ const createPrompt = (productName: string, hasImage: boolean) => {
 6.  **توضیحات متا (\`metaDescription\`):**
     *   بین ۱۴۰ تا ۱۵۰ کاراکتر، شامل کلیدواژه کانونی و فراخوان به اقدام.
 
-7.  **تجزیه و تحلیل سئو برتر (\`advancedSeoAnalysis\`):**
+7.  **متن جایگزین تصویر (\`altImageText\`):**
+    *   یک جمله کوتاه توصیفی (حداکثر ۱۰–۱۲ کلمه).
+    *   شامل کلیدواژه کانونی.
+    *   توصیف دقیق محصول برای موتور جستجو (مثال: "Vichy 24h Deodorant Spray 100ml – اسپری دئودورانت ویشی ۲۴ ساعته").
+
+8.  **تجزیه و تحلیل سئو برتر (\`advancedSeoAnalysis\`):**
     *   یک آبجکت کامل و حرفه‌ای شامل موارد زیر:
         *   \`keyphraseSynonyms\`: آرایه‌ای از ۳ تا ۵ مترادف کلیدواژه.
         *   \`lsiKeywords\`: آرایه‌ای از کلیدواژه‌های معنایی مرتبط (LSI).

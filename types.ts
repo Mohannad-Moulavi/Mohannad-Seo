@@ -16,6 +16,7 @@ export interface ProductData {
   slug: string;
   focusKeyword: string;
   metaDescription: string;
+  altImageText: string;
   advancedSeoAnalysis: AdvancedSeoAnalysis;
 }
 

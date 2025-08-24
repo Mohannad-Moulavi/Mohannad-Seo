@@ -281,7 +281,9 @@ function App() {
                     <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
                     {/* 7. Meta Description */}
                     <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} copyText={generatedContent.metaDescription} />
-                    {/* 8. Advanced SEO Analysis */}
+                     {/* 8. Alt Image Text */}
+                    <OutputSection label="متن جایگزین تصویر (Alt Text)" content={generatedContent.altImageText} copyText={generatedContent.altImageText} />
+                    {/* 9. Advanced SEO Analysis */}
                     <OutputSection 
                         label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)"
                         content={
