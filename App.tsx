@@ -6,7 +6,7 @@ import Loader from './components/Loader';
 // --- Helper Components (Defined outside App to prevent re-creation on re-renders) ---
 
 const UploadIcon: React.FC = () => (
-  <svg xmlns="http://www.w.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+  <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-gray-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12" />
   </svg>
 );
@@ -157,13 +157,9 @@ const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ titl
     <div>
         <h4 className="font-semibold text-gray-400">{title}</h4>
         {items && items.length > 0 ? (
-             <div className="flex flex-wrap gap-2 mt-1">
-                {items.map((item, index) => (
-                    <span key={index} className="bg-gray-700/50 text-gray-200 px-2 py-1 rounded text-xs">
-                        {item}
-                    </span>
-                ))}
-            </div>
+            <p className="text-gray-200 mt-1">
+                {items.join('، ')}
+            </p>
         ) : (
             <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
         )}
