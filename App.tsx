@@ -260,13 +260,11 @@ function App() {
                     </div>
 
                     <OutputSection label="توضیحات کامل محصول" content={generatedContent.fullDescription} isHtml={true} copyText={generatedContent.fullDescription} />
-                    <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} copyText={generatedContent.shortDescription} />
                     <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} copyText={generatedContent.focusKeyword} />
                     <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} copyText={generatedContent.seoTitle} />
                     <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
                     <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} copyText={generatedContent.metaDescription} />
-                    
-                    <OutputSection label="عبارات کلیدی مترادف" content={generatedContent.keyphraseSynonyms.join('، ')} copyText={generatedContent.keyphraseSynonyms.join(', ')} />
+                    <OutputSection label="تجزیه و تحلیل سئو برتر (Advanced SEO Analysis)" content={generatedContent.keyphraseSynonyms.join('، ')} copyText={generatedContent.keyphraseSynonyms.join(', ')} />
                 </div>
               )}
             </div>
