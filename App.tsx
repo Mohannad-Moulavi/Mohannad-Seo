@@ -431,6 +431,18 @@ function App() {
             font-weight: 700;
             color: #fafafa;
           }
+          .prose h2 {
+            font-size: 1em; /* Same size as surrounding text */
+            font-weight: 700;
+            color: #fafafa; /* Same as strong tag */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0;
+            border-bottom: none;
+          }
+          .prose h2:first-of-type {
+              margin-top: 0;
+          }
           .prose p, .prose ul {
             margin-bottom: 0.75rem;
           }
