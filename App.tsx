@@ -428,12 +428,17 @@ function App() {
             background: #718096; /* gray-500 */
           }
           .prose strong {
-            display: block;
-            font-size: 1.1rem;
             font-weight: 700;
-            margin-top: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: #90cdf4; /* blue-300 */
+            color: #fafafa;
+          }
+          .prose h2 {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #63b3ed;
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0.25rem;
+            border-bottom: 1px solid #4a5568;
           }
           .prose p, .prose ul {
             margin-bottom: 0.75rem;
