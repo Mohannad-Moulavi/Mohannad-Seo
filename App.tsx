@@ -432,13 +432,13 @@ function App() {
             color: #fafafa;
           }
           .prose h2 {
-            font-size: 1.25rem;
+            font-size: 1.125rem;
             font-weight: 700;
-            color: #63b3ed;
-            margin-top: 1.5rem;
+            color: #fafafa;
+            margin-top: 2rem;
             margin-bottom: 0.75rem;
-            padding-bottom: 0.25rem;
-            border-bottom: 1px solid #4a5568;
+            padding-bottom: 0;
+            border-bottom: none;
           }
           .prose p, .prose ul {
             margin-bottom: 0.75rem;
