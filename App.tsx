@@ -244,6 +244,8 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
 
 function App() {
   const [productName, setProductName] = useState<string>('');
+  const [briefDescription, setBriefDescription] = useState<string>('');
+  const [isNutsOrDriedFruit, setIsNutsOrDriedFruit] = useState<boolean>(false);
   const [productImage, setProductImage] = useState<ImageFile | null>(null);
   const [generatedContent, setGeneratedContent] = useState<ProductData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
@@ -260,7 +262,7 @@ function App() {
     setGeneratedContent(null);
 
     try {
-      const content = await generateProductContent(productName, productImage);
+      const content = await generateProductContent(productName, productImage, briefDescription, isNutsOrDriedFruit);
       setGeneratedContent(content);
     } catch (err) {
       if (err instanceof Error) {
@@ -271,7 +273,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [productName, productImage]);
+  }, [productName, productImage, briefDescription, isNutsOrDriedFruit]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
@@ -301,6 +303,36 @@ function App() {
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                 />
               </div>
+
+              <div>
+                <label htmlFor="brief-description" className="block text-sm font-medium text-gray-300 mb-2">توضیحات مختصر محصول (اختیاری)</label>
+                <textarea
+                  id="brief-description"
+                  rows={5}
+                  value={briefDescription}
+                  onChange={(e) => setBriefDescription(e.target.value)}
+                  placeholder="هر اطلاعاتی که به تولید محتوای بهتر کمک می‌کند را اینجا وارد کنید. مثال:
+طعم: نمکی
+خاستگاه: دامغان
+روش نگهداری: در محیط خشک و خنک"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                />
+              </div>
+
+              <div className="flex items-center gap-x-3">
+                <input
+                    id="is-nuts-checkbox"
+                    name="is-nuts-checkbox"
+                    type="checkbox"
+                    checked={isNutsOrDriedFruit}
+                    onChange={(e) => setIsNutsOrDriedFruit(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-500 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                />
+                 <label htmlFor="is-nuts-checkbox" className="block text-sm font-medium leading-6 text-gray-300">
+                    این محصول آجیل یا خشکبار است؟ (برای تولید توضیحات متفاوت)
+                </label>
+              </div>
+
               <ImageUploader image={productImage} setImage={setProductImage} />
               
               <button

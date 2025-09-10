@@ -3,6 +3,8 @@ import type { ProductData, ImageFile } from '../types';
 export const generateProductContent = async (
   productName: string,
   productImage: ImageFile | null,
+  briefDescription: string,
+  isNutsOrDriedFruit: boolean,
 ): Promise<ProductData> => {
   try {
     const response = await fetch('/api/generate', {
@@ -10,7 +12,7 @@ export const generateProductContent = async (
       headers: {
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify({ productName, productImage }),
+      body: JSON.stringify({ productName, productImage, briefDescription, isNutsOrDriedFruit }),
     });
 
     if (!response.ok) {
