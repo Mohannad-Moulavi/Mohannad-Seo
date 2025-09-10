@@ -431,7 +431,7 @@ function App() {
             font-weight: 700;
             color: #fafafa;
           }
-          .prose h2 {
+          .prose h4 {
             font-size: 1em; /* Same size as surrounding text */
             font-weight: 700;
             color: #fafafa; /* Same as strong tag */
@@ -440,7 +440,7 @@ function App() {
             padding-bottom: 0;
             border-bottom: none;
           }
-          .prose h2:first-of-type {
+          .prose h4:first-of-type {
               margin-top: 0;
           }
           .prose p, .prose ul {
