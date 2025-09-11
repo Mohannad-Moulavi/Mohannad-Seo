@@ -1,23 +1,13 @@
-export interface AdvancedSeoAnalysis {
-  keyphraseSynonyms: string[];
-  lsiKeywords: string[];
-  longTailKeywords: string[];
-  semanticEntities: string[];
-  searchIntent: string;
-  internalLinkingSuggestions: string[];
-}
-
 export interface ProductData {
-  correctedProductName: string;
-  englishProductName: string;
+  correctedProductName: string; // The name corrected by AI
+  englishProductName: string; // The English name of the product
   fullDescription: string;
-  shortDescription: string;
+  shortDescription: string; // A short, catchy product description
   seoTitle: string;
-  slug: string;
+  slug: string; // SEO-friendly URL slug
   focusKeyword: string;
   metaDescription: string;
-  altImageText: string;
-  advancedSeoAnalysis: AdvancedSeoAnalysis;
+  keyphraseSynonyms: string[];
 }
 
 export interface ImageFile {
