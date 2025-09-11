@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback } from 'react';
 import type { ProductData, ImageFile } from './types';
 import { generateProductContent } from './services/geminiService';
 import Loader from './components/Loader';
@@ -131,13 +131,15 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
         <div className="bg-gray-800 p-4 rounded-lg shadow-md">
             <div className="flex justify-between items-center mb-2">
                 <h3 className="font-bold text-lg text-blue-300">{label}</h3>
-                <button
-                    onClick={handleCopy}
-                    className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-md transition-colors text-sm"
-                >
-                    {copied ? <CheckIcon /> : <CopyIcon />}
-                    <span>{copied ? 'کپی شد!' : 'کپی'}</span>
-                </button>
+                {copyText && (
+                    <button
+                        onClick={handleCopy}
+                        className="flex items-center space-x-2 bg-gray-700 hover:bg-gray-600 text-gray-300 px-3 py-1 rounded-md transition-colors text-sm"
+                    >
+                        {copied ? <CheckIcon /> : <CopyIcon />}
+                        <span>{copied ? 'کپی شد!' : 'کپی'}</span>
+                    </button>
+                )}
             </div>
             <div className="text-gray-300 whitespace-pre-wrap font-sans">
                 {isHtml && typeof content === 'string' ? (
@@ -151,34 +153,116 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
     );
 };
 
+const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ title, items }) => (
+    <div>
+        <h4 className="font-semibold text-gray-400">{title}</h4>
+        {items && items.length > 0 ? (
+            <p className="text-gray-200 mt-1">
+                {items.join('، ')}
+            </p>
+        ) : (
+            <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
+        )}
+    </div>
+);
+
+
+const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }> = ({ analysis }) => {
+    const [activeTab, setActiveTab] = useState('keywords');
+
+    const tabs = {
+        keywords: 'کلیدواژه‌ها',
+        intent: 'هدف جستجو',
+        linking: 'لینک‌سازی داخلی',
+    };
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'keywords': {
+                const allKeywords = [
+                    ...(analysis.keyphraseSynonyms || []),
+                    ...(analysis.lsiKeywords || []),
+                    ...(analysis.longTailKeywords || []),
+                    ...(analysis.semanticEntities || []),
+                ].filter(Boolean);
+
+                return (
+                     <div>
+                        <h4 className="font-semibold text-gray-400 mb-2">کلیدواژه های مرتبط</h4>
+                        {allKeywords.length > 0 ? (
+                            <p className="text-gray-200 bg-gray-700/50 p-3 rounded-md leading-relaxed">
+                                {allKeywords.join('، ')}
+                            </p>
+                        ) : (
+                            <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
+                        )}
+                    </div>
+                );
+            }
+            case 'intent':
+                return (
+                    <div>
+                        <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
+                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{analysis.searchIntent}</p>
+                    </div>
+                );
+            case 'linking':
+                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={analysis.internalLinkingSuggestions} />;
+            default:
+                return null;
+        }
+    };
+
+    return (
+        <div>
+            <div className="flex border-b border-gray-700 mb-3">
+                {Object.entries(tabs).map(([key, title]) => (
+                    <button
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                        className={`-mb-px px-4 py-2 text-sm font-medium transition-colors focus:outline-none ${
+                            activeTab === key
+                                ? 'border-b-2 border-blue-400 text-white'
+                                : 'border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-500'
+                        }`}
+                        aria-pressed={activeTab === key}
+                    >
+                        {title}
+                    </button>
+                ))}
+            </div>
+            {/* The key attribute forces React to re-mount the component, triggering the animation */}
+            <div key={activeTab} className="pt-2 text-sm animate-fade-in-fast">
+                {renderContent()}
+            </div>
+        </div>
+    );
+};
+
 
 // --- Main App Component ---
 
-const API_KEY_STORAGE_KEY = 'gemini-api-key';
-
 function App() {
   const [productName, setProductName] = useState<string>('');
-  const [apiKey, setApiKey] = useState<string>(() => localStorage.getItem(API_KEY_STORAGE_KEY) || '');
+  const [briefDescription, setBriefDescription] = useState<string>('');
+  const [isNutsOrDriedFruit, setIsNutsOrDriedFruit] = useState<boolean>(false);
   const [productImage, setProductImage] = useState<ImageFile | null>(null);
   const [generatedContent, setGeneratedContent] = useState<ProductData | null>(null);
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
-    localStorage.setItem(API_KEY_STORAGE_KEY, apiKey);
-  }, [apiKey]);
-
   const handleSubmit = useCallback(async () => {
-    if (!productName || !apiKey) {
-      setError('لطفاً نام محصول و کلید API را وارد کنید.');
+    if (!productName) {
+      setError('لطفاً نام محصول را وارد کنید.');
       return;
     }
+    
     setError(null);
     setIsLoading(true);
     setGeneratedContent(null);
 
     try {
-      const content = await generateProductContent(productName, productImage, apiKey);
+      const content = await generateProductContent(productName, productImage, briefDescription, isNutsOrDriedFruit);
       setGeneratedContent(content);
     } catch (err) {
       if (err instanceof Error) {
@@ -189,7 +273,7 @@ function App() {
     } finally {
       setIsLoading(false);
     }
-  }, [productName, productImage, apiKey]);
+  }, [productName, productImage, briefDescription, isNutsOrDriedFruit]);
 
   return (
     <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8">
@@ -208,19 +292,6 @@ function App() {
           <div className="bg-gray-800/50 p-6 rounded-xl shadow-lg border border-gray-700">
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-200">۱. اطلاعات محصول را وارد کنید</h2>
             <div className="space-y-6">
-               <div>
-                <label htmlFor="api-key" className="block text-sm font-medium text-gray-300 mb-2">
-                  کلید API گوگل
-                </label>
-                <input
-                  type="password"
-                  id="api-key"
-                  value={apiKey}
-                  onChange={(e) => setApiKey(e.target.value)}
-                  placeholder="کلید خود را اینجا وارد کنید"
-                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
-                />
-              </div>
               <div>
                 <label htmlFor="product-name" className="block text-sm font-medium text-gray-300 mb-2">نام محصول (یا یک توصیف کلی)</label>
                 <input
@@ -232,11 +303,41 @@ function App() {
                   className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
                 />
               </div>
+
+              <div>
+                <label htmlFor="brief-description" className="block text-sm font-medium text-gray-300 mb-2">توضیحات مختصر محصول (اختیاری)</label>
+                <textarea
+                  id="brief-description"
+                  rows={5}
+                  value={briefDescription}
+                  onChange={(e) => setBriefDescription(e.target.value)}
+                  placeholder="هر اطلاعاتی که به تولید محتوای بهتر کمک می‌کند را اینجا وارد کنید. مثال:
+طعم: نمکی
+خاستگاه: دامغان
+روش نگهداری: در محیط خشک و خنک"
+                  className="w-full bg-gray-700 border border-gray-600 rounded-md px-4 py-2 text-white focus:ring-2 focus:ring-blue-500 focus:outline-none transition"
+                />
+              </div>
+
+              <div className="flex items-center gap-x-3">
+                <input
+                    id="is-nuts-checkbox"
+                    name="is-nuts-checkbox"
+                    type="checkbox"
+                    checked={isNutsOrDriedFruit}
+                    onChange={(e) => setIsNutsOrDriedFruit(e.target.checked)}
+                    className="h-4 w-4 rounded border-gray-500 bg-gray-700 text-blue-600 focus:ring-blue-500"
+                />
+                 <label htmlFor="is-nuts-checkbox" className="block text-sm font-medium leading-6 text-gray-300">
+                    این محصول آجیل یا خشکبار است؟ (برای تولید توضیحات متفاوت)
+                </label>
+              </div>
+
               <ImageUploader image={productImage} setImage={setProductImage} />
               
               <button
                 onClick={handleSubmit}
-                disabled={isLoading || !productName || !apiKey}
+                disabled={isLoading || !productName}
                 className="w-full bg-blue-600 hover:bg-blue-700 disabled:bg-gray-500 disabled:cursor-not-allowed text-white font-bold py-3 px-4 rounded-lg flex justify-center items-center transition-all duration-300 transform hover:scale-105"
               >
                 {isLoading ? <Loader /> : '✨ تولید محتوای بهینه'}
@@ -261,35 +362,47 @@ function App() {
                  </div>
               )}
               {generatedContent && (
-                <div className="space-y-4">
-                    {/* Corrected Product Name Row */}
-                    <div className="bg-gray-800 p-4 rounded-lg shadow-md animate-fade-in border border-teal-500/30">
-                        <h3 className="font-bold text-lg text-teal-300 mb-3">🏷️ نام محصول شناسایی شده</h3>
-                        <div className="space-y-3 text-gray-300">
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <span className="font-semibold text-gray-400 mb-1 sm:mb-0">نام فارسی (اصلاح شده):</span>
-                                <code className="bg-gray-700 px-3 py-1 rounded-md text-teal-300 font-bold">{generatedContent.correctedProductName}</code>
-                            </div>
-                            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between">
-                                <span className="font-semibold text-gray-400 mb-1 sm:mb-0">نام انگلیسی:</span>
-                                <code className="bg-gray-700 px-3 py-1 rounded-md text-teal-300 font-bold" dir="ltr">{generatedContent.englishProductName}</code>
-                            </div>
-                        </div>
-                    </div>
-
+                <div className="space-y-4 animate-fade-in">
+                    {/* 1. Product Name */}
+                    <OutputSection
+                        label="نام محصول"
+                        content={
+                            <p>
+                                <strong className="font-bold text-xl text-white">{generatedContent.correctedProductName}</strong>
+                                <span className="block text-gray-400">{generatedContent.englishProductName}</span>
+                            </p>
+                        }
+                        copyText={`${generatedContent.correctedProductName}\n${generatedContent.englishProductName}`}
+                    />
+                    {/* 2. Full Description */}
                     <OutputSection label="توضیحات کامل محصول" content={generatedContent.fullDescription} isHtml={true} copyText={generatedContent.fullDescription} />
-                    <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} />
-                    <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} />
-                    <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} />
-                    <OutputSection label="نامک (Slug)" content={generatedContent.slug} />
-                    <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} />
-                    
-                    <OutputSection label="تجزیه و تحلیل سئو برتر (Advanced SEO Analysis)" content={null} copyText={generatedContent.keyphraseSynonyms.join(', ')}>
-                        <div className="mt-2">
-                            <span className="font-semibold text-gray-400">عبارات مترادف کلیدی: </span>
-                            <p className="inline">{generatedContent.keyphraseSynonyms.join('، ')}</p>
-                        </div>
-                    </OutputSection>
+                    {/* 3. Short Description */}
+                     <OutputSection label="توضیحات کوتاه (Short Description)" content={generatedContent.shortDescription} copyText={generatedContent.shortDescription} />
+                    {/* 4. Focus Keyphrase */}
+                    <OutputSection label="کلیدواژه کانونی (Focus Keyphrase)" content={generatedContent.focusKeyword} copyText={generatedContent.focusKeyword} />
+                    {/* 5. SEO Title */}
+                    <OutputSection label="عنوان سئو (SEO Title)" content={generatedContent.seoTitle} copyText={generatedContent.seoTitle} />
+                    {/* 6. Slug */}
+                    <OutputSection label="نامک (Slug)" content={generatedContent.slug} copyText={generatedContent.slug} />
+                    {/* 7. Meta Description */}
+                    <OutputSection label="توضیحات متا (Meta Description)" content={generatedContent.metaDescription} copyText={generatedContent.metaDescription} />
+                     {/* 8. Alt Image Text */}
+                    <OutputSection label="متن جایگزین تصویر (Alt Text)" content={generatedContent.altImageText} copyText={generatedContent.altImageText} />
+                    {/* 9. Advanced SEO Analysis */}
+                    <OutputSection 
+                        label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)"
+                        content={<AdvancedSeoTabs analysis={generatedContent.advancedSeoAnalysis} />}
+                        copyText={
+                           `Keywords: ${[
+                                ...(generatedContent.advancedSeoAnalysis.keyphraseSynonyms || []),
+                                ...(generatedContent.advancedSeoAnalysis.lsiKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis.longTailKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis.semanticEntities || []),
+                            ].filter(Boolean).join(', ')}\n` +
+                            `Search Intent: ${generatedContent.advancedSeoAnalysis.searchIntent}\n` +
+                            `Internal Linking Suggestions: ${generatedContent.advancedSeoAnalysis.internalLinkingSuggestions.join(', ')}`
+                        }
+                    />
                 </div>
               )}
             </div>
@@ -315,12 +428,20 @@ function App() {
             background: #718096; /* gray-500 */
           }
           .prose strong {
-            display: block;
-            font-size: 1.1rem;
             font-weight: 700;
-            margin-top: 1.25rem;
-            margin-bottom: 0.5rem;
-            color: #90cdf4; /* blue-300 */
+            color: #fafafa;
+          }
+          .prose h4, .prose h5 {
+            font-size: 1em; /* Same size as surrounding text */
+            font-weight: 700;
+            color: #fafafa; /* Same as strong tag */
+            margin-top: 1.5rem;
+            margin-bottom: 0.75rem;
+            padding-bottom: 0;
+            border-bottom: none;
+          }
+          .prose h4:first-of-type, .prose h5:first-of-type {
+              margin-top: 0.75rem;
           }
           .prose p, .prose ul {
             margin-bottom: 0.75rem;
@@ -342,6 +463,13 @@ function App() {
           }
           .animate-fade-in {
             animation: fade-in 0.5s ease-out forwards;
+          }
+          @keyframes fade-in-fast {
+            from { opacity: 0; transform: translateY(-5px); }
+            to { opacity: 1; transform: translateY(0); }
+          }
+          .animate-fade-in-fast {
+            animation: fade-in-fast 0.3s ease-out forwards;
           }
       `}</style>
     </div>
