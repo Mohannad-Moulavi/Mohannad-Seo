@@ -432,49 +432,6 @@ const extractJsonText = (value: string): string => {
   return text;
 };
 
-const toText = (value: unknown, fallback = ''): string => {
-  if (typeof value === 'string') return value;
-  if (value === null || value === undefined) return fallback;
-  return String(value);
-};
-
-const toStringArray = (value: unknown): string[] => {
-  if (Array.isArray(value)) {
-    return value.map(item => toText(item).trim()).filter(Boolean);
-  }
-  if (typeof value === 'string' && value.trim()) {
-    return value.split(/[،,\n]/).map(item => item.trim()).filter(Boolean);
-  }
-  return [];
-};
-
-const normalizeGeneratedProductData = (value: any, productName: string): any => {
-  const data = value && typeof value === 'object' ? value : {};
-  const analysis = data.advancedSeoAnalysis && typeof data.advancedSeoAnalysis === 'object'
-    ? data.advancedSeoAnalysis
-    : {};
-
-  return {
-    correctedProductName: toText(data.correctedProductName, productName),
-    englishProductName: toText(data.englishProductName, ''),
-    fullDescription: toText(data.fullDescription, `<p>${productName}</p>`),
-    shortDescription: toText(data.shortDescription, ''),
-    seoTitle: toText(data.seoTitle, productName),
-    slug: toText(data.slug, ''),
-    focusKeyword: toText(data.focusKeyword, productName),
-    metaDescription: toText(data.metaDescription, ''),
-    altImageText: toText(data.altImageText, productName),
-    advancedSeoAnalysis: {
-      keyphraseSynonyms: toStringArray(analysis.keyphraseSynonyms),
-      lsiKeywords: toStringArray(analysis.lsiKeywords),
-      longTailKeywords: toStringArray(analysis.longTailKeywords),
-      semanticEntities: toStringArray(analysis.semanticEntities),
-      searchIntent: toText(analysis.searchIntent, 'خرید'),
-      internalLinkingSuggestions: toStringArray(analysis.internalLinkingSuggestions),
-    },
-  };
-};
-
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
@@ -550,11 +507,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error('AI Gateway did not return a valid text response.');
     }
     
-    const parsedData = JSON.parse(extractJsonText(rawContent));
-    const generatedData = normalizeGeneratedProductData(parsedData, productName);
+    const generatedData = JSON.parse(extractJsonText(rawContent));
     const selectedCategory = pickInternalCategory(generatedData, productName, briefDescription, isNutsOrDriedFruit);
     generatedData.fullDescription = addSingleInternalLink(generatedData.fullDescription, selectedCategory);
-    generatedData.advancedSeoAnalysis.internalLinkingSuggestions = [selectedCategory.title];
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(generatedData);
