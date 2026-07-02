@@ -1,5 +1,10 @@
-import { Type } from "@google/genai";
 import type { ProductData, ImageFile } from '../types';
+
+const Type = {
+  OBJECT: 'object',
+  ARRAY: 'array',
+  STRING: 'string',
+} as const;
 
 // This is a Vercel Serverless Function. It will not be bundled with the client-side code.
 // To use it with Vercel, you need to configure your project to handle TypeScript files in the /api directory.
@@ -127,7 +132,7 @@ const nuts_description_prompt = `
 - **طول متن:** کل توضیحات باید بین ۲۲۰ تا ۳۰۰ کلمه باشد.
 - **خوانایی:** جملات باید کوتاه و روان باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** داخل متن تولیدی خودت هیچ تگ \`<a>\` نساز. لینک داخلی مناسب بعد از تولید متن، توسط سیستم به صورت خودکار و دقیقاً یک‌بار به توضیحات اضافه می‌شود.
+- **لینک‌سازی داخلی:** در متن، یک عبارت کلیدی مناسب را به یک محصول یا دسته‌بندی مرتبط لینک بده (مثلاً: "برای مشاهده همه پسته‌ها کلیک کنید"). این لینک باید به صورت یک تگ \`<a>\` با \`href="#"\` و متنی توصیفی باشد.
 
 # 2. ساختار و فرمت متن (بسیار مهم)
 - توضیحات باید با یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه شروع شود. **این پاراگراف نباید هیچ تیتری داشته باشد.**
@@ -190,7 +195,7 @@ const standard_description_prompt = `
 - **پاراگراف‌ها:** یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه بنویس. سایر پاراگراف‌ها باید بین ۴۰ تا ۶۰ کلمه باشند.
 - **خوانایی:** جملات باید کوتاه (حداکثر ۲۰ کلمه) باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول (۵۰ کلمه ابتدایی) بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** داخل متن تولیدی خودت هیچ تگ \`<a>\` نساز. لینک داخلی مناسب بعد از تولید متن، توسط سیستم به صورت خودکار و دقیقاً یک‌بار به توضیحات اضافه می‌شود.
+- **لینک‌سازی داخلی:** در متن، یک عبارت کلیدی مناسب را به یک محصول یا دسته‌بندی مرتبط لینک بده (به صورت یک تگ \`<a>\` با \`href="#"\` و متنی توصیفی).
 
 # 2. ساختار و فرمت متن
 - **بخش‌های تطبیقی (Dynamic Sections):** ساختار بخش‌ها باید **بر اساس نوع محصول** هوشمندانه انتخاب شود. هر بخش باید با یک تیتر \`<h5>\` همراه با یک ایموجی مناسب شروع شود (مثال: \`<h5>✅ ویژگی‌های اصلی:</h5>\`). **بخش‌های نامرتبط را به صورت خودکار حذف کن.**
@@ -261,32 +266,16 @@ const INTERNAL_LINKS: InternalLink[] = [
     "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/eye-makeup/"
   },
   {
-    "title": "آرایش چشم و ابرو",
-    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%da%86%d8%b4%d9%85-%d9%88-%d8%a7%d8%a8%d8%b1%d9%88/"
-  },
-  {
     "title": "آرایش صورت",
     "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d8%b5%d9%88%d8%b1%d8%aa/"
-  },
-  {
-    "title": "آرایش صورت",
-    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/face-makeup/"
   },
   {
     "title": "آرایش لب",
     "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d9%84%d8%a8/"
   },
   {
-    "title": "آرایش لب",
-    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/lip-makeup/"
-  },
-  {
     "title": "آرایش ناخن",
     "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/nail/"
-  },
-  {
-    "title": "آرایش ناخن",
-    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d9%86%d8%a7%d8%ae%d9%86/"
   },
   {
     "title": "آرایشی",
@@ -295,10 +284,6 @@ const INTERNAL_LINKS: InternalLink[] = [
   {
     "title": "ابزار آرایش",
     "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/makeup-accessories/"
-  },
-  {
-    "title": "ابزار آرایش",
-    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a7%d8%a8%d8%b2%d8%a7%d8%b1-%d8%a2%d8%b1%d8%a7%db%8c%d8%b4/"
   },
   {
     "title": "ابزار آرایش و پیرایش",
@@ -349,10 +334,6 @@ const INTERNAL_LINKS: InternalLink[] = [
     "url": "https://noon-valqalam.ir/product-category//deodorant-spray/body-bath/"
   },
   {
-    "title": "بدن و حمام",
-    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d8%af%d9%86-%d9%88-%d8%ad%d9%85%d8%a7%d9%85/"
-  },
-  {
     "title": "برگه ها",
     "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/appricot/"
   },
@@ -363,10 +344,6 @@ const INTERNAL_LINKS: InternalLink[] = [
   {
     "title": "بهداشت بانوان و آقایان",
     "url": "https://noon-valqalam.ir/product-category//deodorant-spray/women-men-care/"
-  },
-  {
-    "title": "بهداشت بانوان و آقایان",
-    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d9%87%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d8%a7%d9%86%d9%88%d8%a7%d9%86-%d9%88-%d8%a2%d9%82%d8%a7%db%8c%d8%a7%d9%86/"
   },
   {
     "title": "بهداشت دهان و دندان",
@@ -407,10 +384,6 @@ const INTERNAL_LINKS: InternalLink[] = [
   {
     "title": "پنیر",
     "url": "https://noon-valqalam.ir/product-category/hypermarket/cheese/"
-  },
-  {
-    "title": "پنیر",
-    "url": "https://noon-valqalam.ir/product-category/hypermarket/milk/"
   },
   {
     "title": "پودر ژله",
@@ -503,14 +476,6 @@ const INTERNAL_LINKS: InternalLink[] = [
   {
     "title": "دئودرانت و ضد تعریق",
     "url": "https://noon-valqalam.ir/product-category//deodorant-spray/"
-  },
-  {
-    "title": "دئودرانت و ضد تعریق",
-    "url": "https://noon-valqalam.ir/product-category//deodorant-spray/women-men-care/deodorant/"
-  },
-  {
-    "title": "دئودرانت و ضد تعریق",
-    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/"
   },
   {
     "title": "دسر",
@@ -643,10 +608,6 @@ const INTERNAL_LINKS: InternalLink[] = [
   {
     "title": "شکلات",
     "url": "https://noon-valqalam.ir/product-category/%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"
-  },
-  {
-    "title": "شکلات",
-    "url": "https://noon-valqalam.ir/product-category/hypermarket/chocolate/"
   },
   {
     "title": "شلات",
@@ -861,10 +822,6 @@ const INTERNAL_LINKS: InternalLink[] = [
     "url": "https://noon-valqalam.ir/product-category/%d9%86%d9%88%d8%af%d9%84/"
   },
   {
-    "title": "نودل",
-    "url": "https://noon-valqalam.ir/product-category/hypermarket/noodles/"
-  },
-  {
     "title": "نوشیدنی",
     "url": "https://noon-valqalam.ir/product-category/hypermarket/drink/"
   },
@@ -894,122 +851,193 @@ const INTERNAL_LINKS: InternalLink[] = [
   }
 ];
 
-const SPECIAL_INTERNAL_LINK_RULES: InternalLink[] = [
-  { title: 'قهوه', url: 'https://noon-valqalam.ir/product-category/coffee/', keywords: ['کافی میت', 'کافی‌میت', 'coffee mate', 'کریمر', 'کافی', 'کافه میت'] },
-  { title: 'قهوه فوری', url: 'https://noon-valqalam.ir/product-category/hypermarket/instant-coffee/', keywords: ['نسکافه', 'قهوه فوری', 'کاپوچینو', 'لاته فوری', 'هات چاکلت'] },
-  { title: 'گز', url: 'https://noon-valqalam.ir/product-category/%da%af%d8%b2/', keywords: ['گز', 'گز آردی', 'گز لقمه', 'گز پسته'] },
-  { title: 'سوهان', url: 'https://noon-valqalam.ir/product-category/%d8%b3%d9%88%d9%87%d8%a7%d9%86/', keywords: ['سوهان', 'سوهان عسلی', 'سوهان لقمه'] },
-  { title: 'پسته ها', url: 'https://noon-valqalam.ir/product-category/nuts/nut/pistachios/', keywords: ['پسته', 'مغز پسته', 'پسته اکبری', 'پسته احمد آقایی', 'پسته کله قوچی'] },
-  { title: 'خشکبار و آجیل', url: 'https://noon-valqalam.ir/product-category/nuts/', keywords: ['خشکبار', 'آجیل', 'اجیل', 'مغز', 'آجیل ترکیبی'] },
-  { title: 'زعفران', url: 'https://noon-valqalam.ir/product-category/saffron/', keywords: ['زعفران', 'مثقال', 'سرگل', 'نگین'] },
-  { title: 'شکلات', url: 'https://noon-valqalam.ir/product-category/%d8%b4%da%a9%d9%84%d8%a7%d8%aa/', keywords: ['شکلات', 'ویفر شکلات', 'کاکائو'] },
-  { title: 'چای', url: 'https://noon-valqalam.ir/product-category/%da%86%d8%a7%db%8c-2/', keywords: ['چای', 'چای کرک', 'تی بگ'] },
-  { title: 'قند', url: 'https://noon-valqalam.ir/product-category/nuts/%d9%82%d9%86%d8%af/', keywords: ['قند', 'کله قند'] },
-  { title: 'نبات', url: 'https://noon-valqalam.ir/product-category/nuts/%d9%86%d8%a8%d8%a7%d8%aa/', keywords: ['نبات', 'شاخه نبات'] },
-  { title: 'شیرینی', url: 'https://noon-valqalam.ir/product-category/sweets/', keywords: ['شیرینی', 'کیک', 'کلوچه'] },
-  { title: 'لوازم آرایشی بهداشتی', url: 'https://noon-valqalam.ir/product-category/cosmetics/', keywords: ['آرایشی', 'بهداشتی', 'لوازم آرایش'] },
-  { title: 'هایپرمارکت', url: 'https://noon-valqalam.ir/product-category/hypermarket/', keywords: ['هایپر', 'سوپرمارکت', 'مواد غذایی'] },
-];
+const INTERNAL_LINK_KEYWORDS: Record<string, string[]> = {
+  'قهوه': ['قهوه', 'کافی', 'کافی میت', 'نسکافه', 'کریمر', 'کاپوچینو', 'لاته', 'اسپرسو', 'coffee', 'cafe', 'کافه'],
+  'قهوه فوری': ['قهوه فوری', 'نسکافه فوری', 'کافی میکس', 'کافی میت', 'کاپوچینو فوری'],
+  'کافی شاپ': ['کافی شاپ', 'کافه', 'شربت سرد', 'سیروپ', 'هات چاکلت'],
+  'هات چاکلت': ['هات چاکلت', 'شکلات داغ'],
+  'شکلات': ['شکلات', 'کاکائو', 'تلخ', 'شیری', 'ویفر شکلات'],
+  'سوهان': ['سوهان', 'ساعدی نیا', 'بوستان', 'سوهان عسلی', 'سوهان لقمه'],
+  'گز': ['گز', 'آردی', 'لقمه ای', 'نوقا', 'پسته ای'],
+  'قند': ['قند', 'کله قند', 'شکسته'],
+  'زعفران': ['زعفران', 'سرگل', 'نگین', 'مثقال'],
+  'پسته ها': ['پسته', 'مغز پسته', 'پسته خام', 'پسته شور'],
+  'مغز پسته خام': ['مغز پسته خام', 'مغز پسته'],
+  'بادام': ['بادام', 'مغز بادام'],
+  'بادام هندی': ['بادام هندی', 'کاجو', 'cashew'],
+  'فندق': ['فندق', 'مغز فندق'],
+  'گردو': ['گردو', 'مغز گردو'],
+  'آجیل': ['آجیل', 'مغز', 'مغزها'],
+  'آجیل ترکیبی': ['آجیل مخلوط', 'آجیل ترکیبی', 'چهار مغز'],
+  'خشکبار': ['خشکبار', 'میوه خشک', 'برگه', 'کشمش', 'توت خشک', 'انجیر خشک'],
+  'میوه خشک': ['میوه خشک', 'حبه میوه', 'برگه'],
+  'ادویه': ['ادویه', 'فلفل', 'زردچوبه', 'دارچین', 'چاشنی'],
+  'چای': ['چای', 'تی بگ', 'چای سیاه'],
+  'چای کرک': ['چای کرک', 'کرک'],
+  'دمنوش': ['دمنوش', 'گیاهی'],
+  'نبات': ['نبات', 'شاخه نبات'],
+  'نوشیدنی': ['نوشیدنی', 'آبمیوه', 'دلستر', 'انرژی زا'],
+  'بیسکویت': ['بیسکویت', 'کوکی'],
+  'تنقلات': ['تنقلات', 'اسنک', 'پفک', 'چیپس'],
+  'چیپس': ['چیپس'],
+  'لوازم آرایشی بهداشتی': ['آرایشی', 'بهداشتی', 'میکاپ', 'لوازم آرایش'],
+  'مراقبت پوست': ['کرم', 'سرم', 'مراقبت پوست', 'پوست', 'آبرسان', 'مرطوب کننده'],
+  'ضد آفتاب': ['ضد آفتاب', 'سان اسکرین', 'sunscreen'],
+  'شامپو': ['شامپو'],
+  'عطر و ادکلن': ['عطر', 'ادکلن', 'پرفیوم', 'fragrance'],
+  'شوینده': ['شوینده', 'مایع ظرفشویی', 'پودر لباسشویی', 'جرم گیر'],
+  'هایپرمارکت': ['هایپرمارکت', 'سوپرمارکت'],
+  'شیرینی': ['شیرینی', 'کیک', 'کلوچه'],
+  'قنادی': ['قنادی', 'لوازم قنادی'],
+};
 
-function normalizePersianText(value: string): string {
-  return (value || '')
+const normalizePersian = (value: string = ''): string =>
+  value
     .toLowerCase()
-    .replace(/ي/g, 'ی')
-    .replace(/ك/g, 'ک')
-    .replace(/آ/g, 'ا')
-    .replace(/[‌‌]/g, ' ')
-    .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
-    .replace(/\s+/g, ' ')
+    .replace(/[ك]/g, 'ک')
+    .replace(/[ي]/g, 'ی')
+    .replace(/[أإآ]/g, 'ا')
+    .replace(/[ة]/g, 'ه')
+    .replace(/[ً-ٰٟ]/g, '')
+    .replace(/[^\p{L}\p{N}]+/gu, ' ')
     .trim();
-}
 
-function decodeUrlForMatch(url: string): string {
-  try {
-    return decodeURIComponent(url);
-  } catch {
-    return url;
-  }
-}
+const selectInternalLink = (data: Partial<ProductData>, productName: string, briefDescription: string): InternalLink => {
+  const sourceText = normalizePersian([
+    productName,
+    briefDescription,
+    data.correctedProductName,
+    data.englishProductName,
+    data.focusKeyword,
+    data.seoTitle,
+    data.metaDescription,
+    ...(data.advancedSeoAnalysis?.semanticEntities || []),
+    ...(data.advancedSeoAnalysis?.lsiKeywords || []),
+  ].filter(Boolean).join(' '));
 
-function getLinkTerms(link: InternalLink): string[] {
-  const decodedUrl = decodeUrlForMatch(link.url).replace(/https?:\/\/[^/]+/i, ' ');
-  const rawTerms = [
-    link.title,
-    ...(link.keywords || []),
-    ...link.title.split(/\s+/),
-    ...decodedUrl.split(/[\/\-_]+/),
-  ];
+  let best = INTERNAL_LINKS.find(link => link.title === 'هایپرمارکت') || INTERNAL_LINKS[0];
+  let bestScore = -1;
 
-  return Array.from(new Set(
-    rawTerms
-      .map(normalizePersianText)
-      .filter(term => term.length >= 3 && !['های', 'برای', 'محصول', 'محصولات', 'category', 'product'].includes(term))
-  ));
-}
-
-function pickInternalLink(productName: string, briefDescription: string, isNutsOrDriedFruit: boolean): InternalLink {
-  const haystack = normalizePersianText(`${productName} ${briefDescription}`);
-  const candidates = [...SPECIAL_INTERNAL_LINK_RULES, ...INTERNAL_LINKS];
-  let best: { link: InternalLink; score: number } | null = null;
-
-  for (const link of candidates) {
-    const terms = getLinkTerms(link);
+  for (const link of INTERNAL_LINKS) {
+    const title = normalizePersian(link.title);
+    const words = title.split(' ').filter(word => word.length > 2);
     let score = 0;
 
-    for (const term of terms) {
-      if (haystack.includes(term)) {
-        score += 10 + Math.min(term.length, 20);
+    if (title && sourceText.includes(title)) score += 120 + title.length;
+
+    for (const word of words) {
+      if (sourceText.includes(word)) score += 12 + word.length;
+    }
+
+    const aliases = INTERNAL_LINK_KEYWORDS[link.title] || [];
+    for (const alias of aliases) {
+      const normalizedAlias = normalizePersian(alias);
+      if (normalizedAlias && sourceText.includes(normalizedAlias)) score += 90 + normalizedAlias.length;
+    }
+
+    if (score > bestScore) {
+      bestScore = score;
+      best = link;
+    }
+  }
+
+  return best;
+};
+
+const stripHtmlTags = (html: string): string => html.replace(/<[^>]*>/g, '').trim();
+const escapeRegExp = (value: string): string => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+
+const replaceOrInsertSingleInternalLink = (html: string, link: InternalLink, data: Partial<ProductData>): string => {
+  if (!html || typeof html !== 'string') return html;
+  const anchorRegex = /<a[^>]*>([\s\S]*?)<\/a>/gi;
+  const matches = [...html.matchAll(anchorRegex)];
+
+  if (matches.length > 0) {
+    let usedFirst = false;
+    return html.replace(anchorRegex, (_match, innerText) => {
+      const cleanText = stripHtmlTags(innerText || '') || link.title;
+      if (!usedFirst) {
+        usedFirst = true;
+        return `<a href="${link.url}">${cleanText}</a>`;
       }
+      return cleanText;
+    });
+  }
+
+  const candidateTexts = [
+    link.title,
+    data.focusKeyword,
+    data.correctedProductName,
+    data.seoTitle,
+  ].filter((item): item is string => Boolean(item && item.trim().length > 2));
+
+  for (const text of candidateTexts) {
+    const escaped = escapeRegExp(text);
+    const regex = new RegExp(`(${escaped})`, 'i');
+    if (regex.test(html)) {
+      return html.replace(regex, `<a href="${link.url}">$1</a>`);
     }
+  }
 
-    if (SPECIAL_INTERNAL_LINK_RULES.includes(link) && score > 0) {
-      score += 80;
+  return html.replace(/<\/p>/i, ` برای مشاهده محصولات مرتبط، <a href="${link.url}">${link.title}</a> را ببینید.</p>`);
+};
+
+const buildJsonInstruction = (): string => `
+# ساختار خروجی JSON الزامی
+فقط و فقط یک JSON معتبر برگردان. هیچ متن، توضیح، Markdown یا کد بلاک خارج از JSON ننویس.
+کلیدهای JSON باید دقیقاً این‌ها باشند و هیچ کلید اصلی حذف نشود:
+- correctedProductName: string
+- englishProductName: string
+- fullDescription: string HTML
+- shortDescription: string
+- seoTitle: string
+- slug: string انگلیسی
+- focusKeyword: string فارسی
+- metaDescription: string
+- altImageText: string
+- advancedSeoAnalysis: object شامل keyphraseSynonyms, lsiKeywords, longTailKeywords, semanticEntities, searchIntent, internalLinkingSuggestions
+
+قانون مهم: fullDescription باید دقیقاً طبق قوانین و ساختار بخش زیر ساخته شود. ساختار، تیترها، ترتیب بخش‌ها، تگ‌های HTML، hr و ul/li را تغییر نده.
+`;
+
+const extractTextFromGatewayResponse = (payload: any): string => {
+  const messageContent = payload?.choices?.[0]?.message?.content;
+  if (typeof messageContent === 'string') return messageContent;
+  if (Array.isArray(messageContent)) {
+    return messageContent
+      .map((part: any) => typeof part === 'string' ? part : (part?.text || part?.content || ''))
+      .join('');
+  }
+  if (typeof payload?.output_text === 'string') return payload.output_text;
+  if (typeof payload?.text === 'string') return payload.text;
+  return '';
+};
+
+const parseModelJson = (rawText: string): ProductData => {
+  const cleaned = rawText
+    .trim()
+    .replace(/^```(?:json)?\s*/i, '')
+    .replace(/```$/i, '')
+    .trim();
+
+  try {
+    return JSON.parse(cleaned);
+  } catch (_error) {
+    const first = cleaned.indexOf('{');
+    const last = cleaned.lastIndexOf('}');
+    if (first >= 0 && last > first) {
+      return JSON.parse(cleaned.slice(first, last + 1));
     }
-
-    if (!best || score > best.score) {
-      best = { link, score };
-    }
+    throw new Error('AI response was not valid JSON.');
   }
+};
 
-  if (best && best.score > 0) {
-    return best.link;
-  }
-
-  return isNutsOrDriedFruit
-    ? { title: 'خشکبار و آجیل', url: 'https://noon-valqalam.ir/product-category/nuts/' }
-    : { title: 'هایپرمارکت', url: 'https://noon-valqalam.ir/product-category/hypermarket/' };
-}
-
-function escapeHtmlAttribute(value: string): string {
-  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
-}
-
-function forceExactlyOneInternalLink(fullDescription: string, internalLink: InternalLink): string {
-  if (!fullDescription || typeof fullDescription !== 'string') {
-    return fullDescription;
-  }
-
-  const safeUrl = escapeHtmlAttribute(internalLink.url);
-  const safeTitle = internalLink.title.replace(/</g, '').replace(/>/g, '');
-  let anchorWasInserted = false;
-
-  // Remove all model-generated links first. If there is an existing anchor text, keep its text only.
-  let cleaned = fullDescription.replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, (_match, innerText) => innerText || safeTitle);
-
-  const sentence = ` برای مشاهده محصولات مرتبط، <a href="${safeUrl}">${safeTitle}</a> را ببینید.`;
-
-  cleaned = cleaned.replace(/<\/p>/i, () => {
-    if (anchorWasInserted) return '</p>';
-    anchorWasInserted = true;
-    return `${sentence}</p>`;
-  });
-
-  if (!anchorWasInserted) {
-    cleaned += `<p>${sentence.trim()}</p>`;
-  }
-
-  return cleaned;
-}
+const getArvanAuthorizationHeader = (): string => {
+  const rawKey = (process.env.ARVAN_API_KEY || process.env.API_KEY || '').trim();
+  if (!rawKey) throw new Error('ARVAN_API_KEY is not configured in Vercel Environment Variables.');
+  if (/^(apikey|bearer)\s+/i.test(rawKey)) return rawKey;
+  return `apikey ${rawKey}`;
+};
 
 
 export default async function handler(req: VercelRequest, res: VercelResponse) {
@@ -1025,140 +1053,72 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ message: 'Product name is required and must be a string.' });
     }
 
-    const rawGatewayUrl = process.env.ARVAN_AI_GATEWAY_URL || process.env.AI_GATEWAY_URL || process.env.GEMINI_GATEWAY_URL;
-    if (!rawGatewayUrl) {
-      return res.status(500).json({ message: 'AI Gateway URL is missing. Set ARVAN_AI_GATEWAY_URL in Vercel Environment Variables.' });
-    }
-
-    const rawApiKey = process.env.ARVAN_API_KEY || process.env.ARVAN_AI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.AI_GATEWAY_TOKEN;
-    if (!rawApiKey) {
-      return res.status(500).json({ message: 'Arvan API key is missing. Set ARVAN_API_KEY in Vercel Environment Variables.' });
-    }
-
-    const gatewayBaseUrl = rawGatewayUrl.trim().replace(/\/+$/, '');
-    const chatCompletionsUrl = gatewayBaseUrl.endsWith('/chat/completions')
-      ? gatewayBaseUrl
-      : `${gatewayBaseUrl}/chat/completions`;
-    const normalizedApiKey = rawApiKey.trim().replace(/^apikey\s+/i, '');
-
     const description_generation_instruction = isNutsOrDriedFruit
       ? nuts_description_prompt
       : standard_description_prompt;
       
-    const fullSystemInstruction = `${systemInstruction}\n\n# Rules for 'fullDescription' field:\n${description_generation_instruction}`;
-    const selectedInternalLink = pickInternalLink(productName, briefDescription, isNutsOrDriedFruit);
+    const fullSystemInstruction = `${systemInstruction}
+${buildJsonInstruction()}
 
-    // Arvan AI Gateway is OpenAI-compatible and does not use Google's responseSchema directly.
-    // This instruction mirrors the original productSchema field names and descriptions.
-    const responseSchemaInstruction = `
-# ساختار خروجی دقیقاً مثل نسخه اصلی
-خروجی باید فقط یک JSON Object معتبر باشد و هیچ متن یا Markdown خارج از JSON برنگردان.
-تمام کلیدهای زیر دقیقاً اجباری هستند:
+# Rules for 'fullDescription' field:
+${description_generation_instruction}`;
 
-{
-  "correctedProductName": "نام فارسی صحیح و کامل محصول که از روی تصویر تشخیص داده شده است. اگر نام ورودی کاربر صحیح بود، همان نام را برگردان. در صورت عدم وجود تصویر، بر اساس نام ورودی، نام کامل را حدس بزن.",
-  "englishProductName": "نام انگلیسی دقیق محصول که از روی تصویر تشخیص داده شده یا بر اساس دانش عمومی حدس زده شده است.",
-  "fullDescription": "توضیحات کامل محصول با فرمت HTML. این توضیحات باید با یک پاراگراف مقدمه جذاب شروع شود که شامل نام محصول به صورت **bold** است. بخش‌های مختلف باید با تیترهای مشخص از هم جدا شوند.",
-  "shortDescription": "یک جمله کوتاه، خلاصه و جذاب برای توضیحات کوتاه محصول (بین ۲۰ تا ۳۰ کلمه). از هیچ‌گونه قالب‌بندی مانند bold یا strong استفاده نکن.",
-  "seoTitle": "عنوان سئو جذاب و بهینه (حداکثر ۶۰ کاراکتر) شامل کلیدواژه کانونی و کلمات کلیدی مانند 'خرید' یا 'قیمت'.",
-  "slug": "نامک (slug) سئو شده و تمیز فقط به زبان انگلیسی برای URL.",
-  "focusKeyword": "کلیدواژه کانونی اصلی محصول (به فارسی).",
-  "metaDescription": "توضیحات متا جذاب برای گوگل (بین ۱۲۰ تا ۱۵۵ کاراکتر) که شامل کلیدواژه کانونی، یک مزیت کلیدی و یک فراخوان به اقدام (CTA) باشد. از هیچ‌گونه قالب‌بندی مانند bold یا strong استفاده نکن.",
-  "altImageText": "متن جایگزین (alt text) توصیفی و بهینه برای تصویر محصول (حداکثر ۱۰ کلمه) که شامل کلیدواژه کانونی باشد.",
-  "advancedSeoAnalysis": {
-    "keyphraseSynonyms": ["آرایه‌ای از حداقل ۳ عبارت کلیدی مترادف یا مرتبط."],
-    "lsiKeywords": ["آرایه‌ای از کلیدواژه‌های معنایی مرتبط (LSI)."],
-    "longTailKeywords": ["آرایه‌ای از ۲ تا ۳ عبارت کلیدی دم‌بلند و دقیق‌تر."],
-    "semanticEntities": ["موجودیت‌های معنایی کلیدی مانند برند، دسته‌بندی محصول، و ویژگی‌های اصلی."],
-    "searchIntent": "هدف جستجوی کاربر (مثلاً: خرید، مقایسه، اطلاعاتی).",
-    "internalLinkingSuggestions": ["کلمات یا عبارات پیشنهادی برای لینک‌دهی داخلی به صفحات مرتبط."]
-  }
-}
-
-قوانین مهم:
-- کلیدها را تغییر نده.
-- هیچ فیلدی را حذف نکن.
-- fullDescription باید همان متن کامل HTML طبق Rules for fullDescription باشد، نه خلاصه. داخل fullDescription خودت هیچ تگ <a> نساز؛ سیستم بعداً دقیقاً یک لینک داخلی واقعی اضافه می‌کند.
-- اگر محصول آجیل و خشکبار است، ساختار مخصوص آجیل و خشکبار را کامل اجرا کن.
-- اگر محصول عادی است، ساختار داینامیک محصول عادی را کامل اجرا کن.
-`;
-
-    const arvanSystemInstruction = `${fullSystemInstruction}\n\n${responseSchemaInstruction}`;
-
-    const userContent: any[] = [];
-    
-    let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:\n- نام محصول: "${productName}"`;
+    let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:
+- نام محصول: "${productName}"`;
     if (briefDescription) {
-        userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
+        userPrompt += `
+- توضیحات اولیه: "${briefDescription}"`;
     }
     
+    const userContent: any[] = [{ type: 'text', text: userPrompt }];
+
     if (productImage) {
+      userPrompt += "\n- از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن.";
+      userContent[0].text = userPrompt;
       userContent.push({
         type: 'image_url',
         image_url: {
           url: `data:${productImage.mimeType};base64,${productImage.base64}`,
         },
       });
-      userPrompt += "\n- از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن."
     }
 
-    userContent.push({ type: 'text', text: userPrompt });
+    const gatewayUrl = (process.env.ARVAN_AI_GATEWAY_URL || '').trim().replace(/\/+$/, '');
+    if (!gatewayUrl) {
+      throw new Error('ARVAN_AI_GATEWAY_URL is not configured in Vercel Environment Variables.');
+    }
 
-    const gatewayResponse = await fetch(chatCompletionsUrl, {
+    const gatewayResponse = await fetch(`${gatewayUrl}/chat/completions`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        'Authorization': `apikey ${normalizedApiKey}`,
+        'Authorization': getArvanAuthorizationHeader(),
       },
       body: JSON.stringify({
-        model: process.env.ARVAN_AI_MODEL || 'Gemini-2.5-Flash',
+        model: process.env.ARVAN_MODEL || 'Gemini-2.5-Flash',
         messages: [
-          { role: 'system', content: arvanSystemInstruction },
+          { role: 'system', content: fullSystemInstruction },
           { role: 'user', content: userContent },
         ],
-        max_tokens: Number(process.env.ARVAN_MAX_TOKENS || 6000),
+        temperature: Number(process.env.ARVAN_TEMPERATURE || '0.5'),
+        max_tokens: Number(process.env.ARVAN_MAX_TOKENS || '6000'),
+        response_format: { type: 'json_object' },
       }),
     });
 
-    const gatewayText = await gatewayResponse.text();
+    const gatewayPayload = await gatewayResponse.json().catch(() => null);
     if (!gatewayResponse.ok) {
-      return res.status(gatewayResponse.status).json({ message: `AI Gateway Error: ${gatewayText}` });
+      throw new Error(`AI Gateway Error: ${JSON.stringify(gatewayPayload || { status: gatewayResponse.status, statusText: gatewayResponse.statusText })}`);
     }
 
-    let gatewayData: any;
-    try {
-      gatewayData = JSON.parse(gatewayText);
-    } catch {
-      return res.status(500).json({ message: `AI Gateway returned non-JSON response: ${gatewayText}` });
+    const rawText = extractTextFromGatewayResponse(gatewayPayload);
+    if (!rawText) {
+      throw new Error('AI Gateway returned an empty response.');
     }
 
-    let content = gatewayData?.choices?.[0]?.message?.content;
-    if (Array.isArray(content)) {
-      content = content.map((part: any) => part?.text || '').join('');
-    }
-
-    if (!content || typeof content !== 'string') {
-      return res.status(500).json({ message: 'AI Gateway response did not contain message content.' });
-    }
-
-    const jsonText = content
-      .replace(/^```json\s*/i, '')
-      .replace(/^```\s*/i, '')
-      .replace(/```$/i, '')
-      .trim();
-
-    let generatedData: any;
-    try {
-      generatedData = JSON.parse(jsonText);
-    } catch {
-      const match = jsonText.match(/\{[\s\S]*\}/);
-      if (!match) {
-        return res.status(500).json({ message: `Could not parse AI JSON output: ${jsonText}` });
-      }
-      generatedData = JSON.parse(match[0]);
-    }
-
-    generatedData.fullDescription = forceExactlyOneInternalLink(generatedData.fullDescription, selectedInternalLink);
+    const generatedData = parseModelJson(rawText);
+    const internalLink = selectInternalLink(generatedData, productName, briefDescription || '');
+    generatedData.fullDescription = replaceOrInsertSingleInternalLink(generatedData.fullDescription, internalLink, generatedData);
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(generatedData);
