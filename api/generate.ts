@@ -246,7 +246,12 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ message: 'Product name is required and must be a string.' });
     }
 
-    const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
+    if (!apiKey) {
+      return res.status(500).json({ message: 'Gemini API key is missing. Set GEMINI_API_KEY or API_KEY in Vercel Environment Variables.' });
+    }
+
+    const ai = new GoogleGenAI({ apiKey });
 
     const description_generation_instruction = isNutsOrDriedFruit
       ? nuts_description_prompt
