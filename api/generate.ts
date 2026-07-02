@@ -1,5 +1,8 @@
-import { GoogleGenAI, Type } from "@google/genai";
 import type { ProductData, ImageFile } from '../types';
+
+// ArvanCloud AI Gateway version (OpenAI-compatible).
+// Keep the real gateway URL only in Vercel Environment Variables, not in source code.
+const Type = { OBJECT: 'object', ARRAY: 'array', STRING: 'string' } as const;
 
 // This is a Vercel Serverless Function. It will not be bundled with the client-side code.
 // To use it with Vercel, you need to configure your project to handle TypeScript files in the /api directory.
@@ -246,49 +249,122 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       return res.status(400).json({ message: 'Product name is required and must be a string.' });
     }
 
-    const apiKey = process.env.GEMINI_API_KEY || process.env.API_KEY;
-    if (!apiKey) {
-      return res.status(500).json({ message: 'Gemini API key is missing. Set GEMINI_API_KEY or API_KEY in Vercel Environment Variables.' });
+    const rawGatewayUrl = process.env.ARVAN_AI_GATEWAY_URL || process.env.AI_GATEWAY_URL || process.env.GEMINI_GATEWAY_URL;
+    if (!rawGatewayUrl) {
+      return res.status(500).json({
+        message: 'AI Gateway URL is missing. Set ARVAN_AI_GATEWAY_URL in Vercel Environment Variables.'
+      });
     }
 
-    const ai = new GoogleGenAI({ apiKey });
+    const gatewayBaseUrl = rawGatewayUrl.replace(/\/+$/, '');
+    const chatCompletionsUrl = gatewayBaseUrl.endsWith('/chat/completions')
+      ? gatewayBaseUrl
+      : `${gatewayBaseUrl}/chat/completions`;
 
     const description_generation_instruction = isNutsOrDriedFruit
       ? nuts_description_prompt
       : standard_description_prompt;
-      
-    const fullSystemInstruction = `${systemInstruction}\n\n# Rules for 'fullDescription' field:\n${description_generation_instruction}`;
 
-    const parts: any[] = [];
-    
+    const fullSystemInstruction = `${systemInstruction}\n\n# Rules for 'fullDescription' field:\n${description_generation_instruction}\n\n# JSON shape\nReturn only a valid JSON object with these exact keys: correctedProductName, englishProductName, fullDescription, shortDescription, seoTitle, slug, focusKeyword, metaDescription, altImageText, advancedSeoAnalysis. advancedSeoAnalysis must include: keyphraseSynonyms, lsiKeywords, longTailKeywords, semanticEntities, searchIntent, internalLinkingSuggestions.`;
+
+    const userContent: any[] = [];
+
     let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:\n- نام محصول: "${productName}"`;
     if (briefDescription) {
-        userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
+      userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
     }
-    
+
+    userContent.push({ type: 'text', text: userPrompt });
+
     if (productImage) {
-      parts.push({
-        inlineData: {
-          mimeType: productImage.mimeType,
-          data: productImage.base64,
+      userContent.push({
+        type: 'image_url',
+        image_url: {
+          url: `data:${productImage.mimeType};base64,${productImage.base64}`,
         },
       });
-      userPrompt += "\n- از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن."
+      userContent.push({
+        type: 'text',
+        text: 'از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن.',
+      });
     }
 
-    parts.push({ text: userPrompt });
+    const headers: Record<string, string> = {
+      'Content-Type': 'application/json',
+    };
 
-    const response = await ai.models.generateContent({
-      model: 'gemini-2.5-flash',
-      contents: { parts: parts },
-      config: {
-        systemInstruction: fullSystemInstruction,
-        responseMimeType: 'application/json',
-        responseSchema: productSchema,
-      },
+    // Optional: Only set this if your gateway panel gives you a separate Bearer token.
+    const gatewayToken = process.env.ARVAN_AI_GATEWAY_TOKEN || process.env.AI_GATEWAY_TOKEN;
+    if (gatewayToken) {
+      headers.Authorization = `Bearer ${gatewayToken}`;
+    }
+
+    const requestPayload: any = {
+      model: process.env.ARVAN_AI_MODEL || 'Gemini-2.5-Flash',
+      messages: [
+        { role: 'system', content: fullSystemInstruction },
+        { role: 'user', content: userContent },
+      ],
+      temperature: 0.4,
+      response_format: { type: 'json_object' },
+    };
+
+    let gatewayResponse = await fetch(chatCompletionsUrl, {
+      method: 'POST',
+      headers,
+      body: JSON.stringify(requestPayload),
     });
-    
-    const generatedData = JSON.parse(response.text);
+
+    let gatewayText = await gatewayResponse.text();
+
+    // Some gateways do not support OpenAI's response_format field. Retry once without it.
+    if (!gatewayResponse.ok && /response_format|json_object|unsupported|unknown/i.test(gatewayText)) {
+      delete requestPayload.response_format;
+      gatewayResponse = await fetch(chatCompletionsUrl, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(requestPayload),
+      });
+      gatewayText = await gatewayResponse.text();
+    }
+    if (!gatewayResponse.ok) {
+      return res.status(gatewayResponse.status).json({
+        message: `AI Gateway Error: ${gatewayText}`,
+      });
+    }
+
+    let gatewayData: any;
+    try {
+      gatewayData = JSON.parse(gatewayText);
+    } catch {
+      return res.status(500).json({ message: `AI Gateway returned non-JSON response: ${gatewayText}` });
+    }
+
+    let content = gatewayData?.choices?.[0]?.message?.content;
+    if (Array.isArray(content)) {
+      content = content.map((part: any) => part?.text || '').join('');
+    }
+
+    if (!content || typeof content !== 'string') {
+      return res.status(500).json({ message: 'AI Gateway response did not contain message content.' });
+    }
+
+    const jsonText = content
+      .replace(/^```json\s*/i, '')
+      .replace(/^```\s*/i, '')
+      .replace(/```$/i, '')
+      .trim();
+
+    let generatedData: any;
+    try {
+      generatedData = JSON.parse(jsonText);
+    } catch {
+      const match = jsonText.match(/\{[\s\S]*\}/);
+      if (!match) {
+        return res.status(500).json({ message: `Could not parse AI JSON output: ${jsonText}` });
+      }
+      generatedData = JSON.parse(match[0]);
+    }
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(generatedData);

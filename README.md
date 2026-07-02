@@ -1,20 +1,16 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+# Mohannad SEO - Vercel + ArvanCloud AI Gateway
 
-# Run and deploy your AI Studio app
+This version uses an OpenAI-compatible AI Gateway URL instead of a direct Google Gemini API key.
 
-This contains everything you need to run your app locally.
+## Vercel Environment Variables
 
-View your app in AI Studio: https://ai.studio/apps/drive/1Q7JAmE9EgCFDA38T1mszmzrl9bLfKDSR
+Set this variable in Vercel:
 
-## Run Locally
+- `ARVAN_AI_GATEWAY_URL` = your full ArvanCloud AI Gateway URL ending in `/v1`
 
-**Prerequisites:**  Node.js
+Optional variables:
 
+- `ARVAN_AI_MODEL` = `Gemini-2.5-Flash` (default)
+- `ARVAN_AI_GATEWAY_TOKEN` = only if your gateway gives you a separate Bearer token
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+After changing environment variables, redeploy the project.
