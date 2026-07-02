@@ -167,7 +167,17 @@ const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ titl
 );
 
 
-const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }> = ({ analysis }) => {
+const normalizeAdvancedSeoAnalysis = (analysis?: Partial<ProductData['advancedSeoAnalysis']> | null): ProductData['advancedSeoAnalysis'] => ({
+    keyphraseSynonyms: Array.isArray(analysis?.keyphraseSynonyms) ? analysis!.keyphraseSynonyms.filter(Boolean) : [],
+    lsiKeywords: Array.isArray(analysis?.lsiKeywords) ? analysis!.lsiKeywords.filter(Boolean) : [],
+    longTailKeywords: Array.isArray(analysis?.longTailKeywords) ? analysis!.longTailKeywords.filter(Boolean) : [],
+    semanticEntities: Array.isArray(analysis?.semanticEntities) ? analysis!.semanticEntities.filter(Boolean) : [],
+    searchIntent: typeof analysis?.searchIntent === 'string' ? analysis.searchIntent : '',
+    internalLinkingSuggestions: Array.isArray(analysis?.internalLinkingSuggestions) ? analysis!.internalLinkingSuggestions.filter(Boolean) : [],
+});
+
+const AdvancedSeoTabs: React.FC<{ analysis?: Partial<ProductData['advancedSeoAnalysis']> | null }> = ({ analysis }) => {
+    const safeAnalysis = normalizeAdvancedSeoAnalysis(analysis);
     const [activeTab, setActiveTab] = useState('keywords');
 
     const tabs = {
@@ -180,10 +190,10 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
         switch (activeTab) {
             case 'keywords': {
                 const allKeywords = [
-                    ...(analysis.keyphraseSynonyms || []),
-                    ...(analysis.lsiKeywords || []),
-                    ...(analysis.longTailKeywords || []),
-                    ...(analysis.semanticEntities || []),
+                    ...(safeAnalysis.keyphraseSynonyms || []),
+                    ...(safeAnalysis.lsiKeywords || []),
+                    ...(safeAnalysis.longTailKeywords || []),
+                    ...(safeAnalysis.semanticEntities || []),
                 ].filter(Boolean);
 
                 return (
@@ -203,11 +213,11 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
                 return (
                     <div>
                         <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
-                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{analysis.searchIntent}</p>
+                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{safeAnalysis.searchIntent || 'نامشخص'}</p>
                     </div>
                 );
             case 'linking':
-                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={analysis.internalLinkingSuggestions} />;
+                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={safeAnalysis.internalLinkingSuggestions} />;
             default:
                 return null;
         }
@@ -238,6 +248,44 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
         </div>
     );
 };
+
+
+class AppErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; message: string }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: '' };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error?.message || 'خطای نمایش خروجی' };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('UI render error:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex items-center justify-center">
+          <div className="max-w-xl bg-gray-800/70 border border-red-500/40 rounded-xl p-6 text-center">
+            <h1 className="text-2xl font-bold text-red-300 mb-3">خطا در نمایش خروجی</h1>
+            <p className="text-gray-300 mb-4">خروجی ناقص یا غیرمنتظره برگشته بود، ولی صفحه دیگر خالی نمی‌شود. یک بار دوباره تولید محتوا را بزنید.</p>
+            <p className="text-xs text-gray-500 break-words">{this.state.message}</p>
+            <button
+              onClick={() => this.setState({ hasError: false, message: '' })}
+              className="mt-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              برگشت به برنامه
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
 
 
 // --- Main App Component ---
@@ -394,13 +442,13 @@ function App() {
                         content={<AdvancedSeoTabs analysis={generatedContent.advancedSeoAnalysis} />}
                         copyText={
                            `Keywords: ${[
-                                ...(generatedContent.advancedSeoAnalysis.keyphraseSynonyms || []),
-                                ...(generatedContent.advancedSeoAnalysis.lsiKeywords || []),
-                                ...(generatedContent.advancedSeoAnalysis.longTailKeywords || []),
-                                ...(generatedContent.advancedSeoAnalysis.semanticEntities || []),
+                                ...(generatedContent.advancedSeoAnalysis?.keyphraseSynonyms || []),
+                                ...(generatedContent.advancedSeoAnalysis?.lsiKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis?.longTailKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis?.semanticEntities || []),
                             ].filter(Boolean).join(', ')}\n` +
-                            `Search Intent: ${generatedContent.advancedSeoAnalysis.searchIntent}\n` +
-                            `Internal Linking Suggestions: ${generatedContent.advancedSeoAnalysis.internalLinkingSuggestions.join(', ')}`
+                            `Search Intent: ${generatedContent.advancedSeoAnalysis?.searchIntent || ''}\n` +
+                            `Internal Linking Suggestions: ${(generatedContent.advancedSeoAnalysis?.internalLinkingSuggestions || []).join(', ')}`
                         }
                     />
                 </div>
@@ -476,4 +524,10 @@ function App() {
   );
 }
 
-export default App;
+export default function RootApp() {
+  return (
+    <AppErrorBoundary>
+      <App />
+    </AppErrorBoundary>
+  );
+}
