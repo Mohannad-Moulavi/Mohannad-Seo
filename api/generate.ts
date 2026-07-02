@@ -289,15 +289,21 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       });
     }
 
+    const rawApiKey = process.env.ARVAN_API_KEY || process.env.ARVAN_AI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.AI_GATEWAY_TOKEN;
+    if (!rawApiKey) {
+      return res.status(500).json({
+        message: 'Arvan API key is missing. Set ARVAN_API_KEY in Vercel Environment Variables.'
+      });
+    }
+
+    // ArvanCloud AIaaS documentation requires: Authorization: apikey ****
+    // You may paste either the whole value starting with "apikey " or only the key itself.
+    const normalizedApiKey = rawApiKey.trim().replace(/^apikey\s+/i, '');
+
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
+      'Authorization': `apikey ${normalizedApiKey}`,
     };
-
-    // Optional: Only set this if your gateway panel gives you a separate Bearer token.
-    const gatewayToken = process.env.ARVAN_AI_GATEWAY_TOKEN || process.env.AI_GATEWAY_TOKEN;
-    if (gatewayToken) {
-      headers.Authorization = `Bearer ${gatewayToken}`;
-    }
 
     const requestPayload: any = {
       model: process.env.ARVAN_AI_MODEL || 'Gemini-2.5-Flash',

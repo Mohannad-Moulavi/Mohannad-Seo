@@ -1,16 +1,18 @@
 # Mohannad SEO - Vercel + ArvanCloud AI Gateway
 
-This version uses an OpenAI-compatible AI Gateway URL instead of a direct Google Gemini API key.
+This version uses ArvanCloud AIaaS Gateway instead of the direct Google Gemini API.
 
-## Vercel Environment Variables
+## Required Vercel Environment Variables
 
-Set this variable in Vercel:
+Set these in Vercel → Settings → Environment Variables:
 
-- `ARVAN_AI_GATEWAY_URL` = your full ArvanCloud AI Gateway URL ending in `/v1`
+- `ARVAN_AI_GATEWAY_URL` = your ArvanCloud AI Gateway endpoint URL ending in `/v1`
+- `ARVAN_API_KEY` = your ArvanCloud machine-user API key. You can paste either `apikey xxxxx` or only `xxxxx`; the code normalizes it.
 
-Optional variables:
+## Optional
 
-- `ARVAN_AI_MODEL` = `Gemini-2.5-Flash` (default)
-- `ARVAN_AI_GATEWAY_TOKEN` = only if your gateway gives you a separate Bearer token
+- `ARVAN_AI_MODEL` = `Gemini-2.5-Flash` by default. Change only if your endpoint/model name differs.
 
-After changing environment variables, redeploy the project.
+After changing environment variables, redeploy the project in Vercel.
+
+Security note: never put the Gateway URL or API key directly in source code or GitHub.
