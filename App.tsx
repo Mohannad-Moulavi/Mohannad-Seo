@@ -431,31 +431,36 @@ function App() {
             font-weight: 700;
             color: #fafafa;
           }
+          .prose {
+            line-height: 1.75;
+          }
           .prose h4, .prose h5 {
             font-size: 1em; /* Same size as surrounding text */
             font-weight: 700;
             color: #fafafa; /* Same as strong tag */
-            margin-top: 1.5rem;
-            margin-bottom: 0.75rem;
+            margin-top: 0.85rem;
+            margin-bottom: 0.35rem;
             padding-bottom: 0;
             border-bottom: none;
           }
           .prose h4:first-of-type, .prose h5:first-of-type {
-              margin-top: 0.75rem;
+              margin-top: 0.45rem;
           }
           .prose p, .prose ul {
-            margin-bottom: 0.75rem;
+            margin-top: 0.25rem;
+            margin-bottom: 0.45rem;
           }
           .prose ul {
-            padding-right: 1.5rem;
+            padding-right: 1.25rem;
           }
            .prose li {
-            margin-bottom: 0.25rem;
+            margin-top: 0.1rem;
+            margin-bottom: 0.1rem;
            }
            .prose hr {
             border-top-color: #4a5568; /* gray-600 */
-            margin-top: 1.5rem;
-            margin-bottom: 1.5rem;
+            margin-top: 0.75rem;
+            margin-bottom: 0.75rem;
            }
           @keyframes fade-in {
             from { opacity: 0; transform: translateY(-10px); }

@@ -1,8 +1,5 @@
+import { Type } from "@google/genai";
 import type { ProductData, ImageFile } from '../types';
-
-// ArvanCloud AI Gateway version (OpenAI-compatible).
-// Keep the real gateway URL only in Vercel Environment Variables, not in source code.
-const Type = { OBJECT: 'object', ARRAY: 'array', STRING: 'string' } as const;
 
 // This is a Vercel Serverless Function. It will not be bundled with the client-side code.
 // To use it with Vercel, you need to configure your project to handle TypeScript files in the /api directory.
@@ -130,7 +127,7 @@ const nuts_description_prompt = `
 - **طول متن:** کل توضیحات باید بین ۲۲۰ تا ۳۰۰ کلمه باشد.
 - **خوانایی:** جملات باید کوتاه و روان باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** در متن، یک عبارت کلیدی مناسب را به یک محصول یا دسته‌بندی مرتبط لینک بده (مثلاً: "برای مشاهده همه پسته‌ها کلیک کنید"). این لینک باید به صورت یک تگ \`<a>\` با \`href="#"\` و متنی توصیفی باشد.
+- **لینک‌سازی داخلی:** داخل متن تولیدی خودت هیچ تگ \`<a>\` نساز. لینک داخلی مناسب بعد از تولید متن، توسط سیستم به صورت خودکار و دقیقاً یک‌بار به توضیحات اضافه می‌شود.
 
 # 2. ساختار و فرمت متن (بسیار مهم)
 - توضیحات باید با یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه شروع شود. **این پاراگراف نباید هیچ تیتری داشته باشد.**
@@ -193,7 +190,7 @@ const standard_description_prompt = `
 - **پاراگراف‌ها:** یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه بنویس. سایر پاراگراف‌ها باید بین ۴۰ تا ۶۰ کلمه باشند.
 - **خوانایی:** جملات باید کوتاه (حداکثر ۲۰ کلمه) باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول (۵۰ کلمه ابتدایی) بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** در متن، یک عبارت کلیدی مناسب را به یک محصول یا دسته‌بندی مرتبط لینک بده (به صورت یک تگ \`<a>\` با \`href="#"\` و متنی توصیفی).
+- **لینک‌سازی داخلی:** داخل متن تولیدی خودت هیچ تگ \`<a>\` نساز. لینک داخلی مناسب بعد از تولید متن، توسط سیستم به صورت خودکار و دقیقاً یک‌بار به توضیحات اضافه می‌شود.
 
 # 2. ساختار و فرمت متن
 - **بخش‌های تطبیقی (Dynamic Sections):** ساختار بخش‌ها باید **بر اساس نوع محصول** هوشمندانه انتخاب شود. هر بخش باید با یک تیتر \`<h5>\` همراه با یک ایموجی مناسب شروع شود (مثال: \`<h5>✅ ویژگی‌های اصلی:</h5>\`). **بخش‌های نامرتبط را به صورت خودکار حذف کن.**
@@ -236,6 +233,785 @@ const standard_description_prompt = `
 `;
 
 
+type InternalLink = { title: string; url: string; keywords?: string[] };
+
+const INTERNAL_LINKS: InternalLink[] = [
+  {
+    "title": "آبنبات",
+    "url": "https://noon-valqalam.ir/product-category/%d8%a2%d8%a8%d9%86%d8%a8%d8%a7%d8%aa/"
+  },
+  {
+    "title": "آجیل",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/"
+  },
+  {
+    "title": "آجیل ترکیبی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/mixed-nuts/"
+  },
+  {
+    "title": "آجیل مناسبتی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/date-nuts/"
+  },
+  {
+    "title": "آدامس",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/gum/"
+  },
+  {
+    "title": "آرایش چشم و ابرو",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/eye-makeup/"
+  },
+  {
+    "title": "آرایش چشم و ابرو",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%da%86%d8%b4%d9%85-%d9%88-%d8%a7%d8%a8%d8%b1%d9%88/"
+  },
+  {
+    "title": "آرایش صورت",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d8%b5%d9%88%d8%b1%d8%aa/"
+  },
+  {
+    "title": "آرایش صورت",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/face-makeup/"
+  },
+  {
+    "title": "آرایش لب",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d9%84%d8%a8/"
+  },
+  {
+    "title": "آرایش لب",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/lip-makeup/"
+  },
+  {
+    "title": "آرایش ناخن",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/nail/"
+  },
+  {
+    "title": "آرایش ناخن",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d9%86%d8%a7%d8%ae%d9%86/"
+  },
+  {
+    "title": "آرایشی",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/"
+  },
+  {
+    "title": "ابزار آرایش",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup-cosmetics-2/makeup-accessories/"
+  },
+  {
+    "title": "ابزار آرایش",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/makeup/%d8%a7%d8%a8%d8%b2%d8%a7%d8%b1-%d8%a2%d8%b1%d8%a7%db%8c%d8%b4/"
+  },
+  {
+    "title": "ابزار آرایش و پیرایش",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/hair/hair-cutting-tools/"
+  },
+  {
+    "title": "ادویه",
+    "url": "https://noon-valqalam.ir/product-category/nuts/spices/"
+  },
+  {
+    "title": "ارده",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d8%a7%d8%b1%d8%af%d9%87/"
+  },
+  {
+    "title": "اسپری بدن",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/perfume/body-spray/"
+  },
+  {
+    "title": "اسکراب مو",
+    "url": "https://noon-valqalam.ir/product-category/%d8%a7%d8%b3%da%a9%d8%b1%d8%a7%d8%a8-%d9%85%d9%88/"
+  },
+  {
+    "title": "اسمارتیز",
+    "url": "https://noon-valqalam.ir/product-category/%d8%a7%d8%b3%d9%85%d8%a7%d8%b1%d8%aa%db%8c%d8%b2/"
+  },
+  {
+    "title": "انجیر خشک",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/fig/"
+  },
+  {
+    "title": "بادام",
+    "url": "https://noon-valqalam.ir/product-category/nuts/almond/"
+  },
+  {
+    "title": "بادام زمینی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/peanuts/"
+  },
+  {
+    "title": "بادام هندی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/cashew/"
+  },
+  {
+    "title": "بادی اسپلش",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/perfume/bod-splash/"
+  },
+  {
+    "title": "بدن و حمام",
+    "url": "https://noon-valqalam.ir/product-category//deodorant-spray/body-bath/"
+  },
+  {
+    "title": "بدن و حمام",
+    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d8%af%d9%86-%d9%88-%d8%ad%d9%85%d8%a7%d9%85/"
+  },
+  {
+    "title": "برگه ها",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/appricot/"
+  },
+  {
+    "title": "برنج",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d8%a8%d8%b1%d9%86%d8%ac/"
+  },
+  {
+    "title": "بهداشت بانوان و آقایان",
+    "url": "https://noon-valqalam.ir/product-category//deodorant-spray/women-men-care/"
+  },
+  {
+    "title": "بهداشت بانوان و آقایان",
+    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d9%87%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d8%a7%d9%86%d9%88%d8%a7%d9%86-%d9%88-%d8%a2%d9%82%d8%a7%db%8c%d8%a7%d9%86/"
+  },
+  {
+    "title": "بهداشت دهان و دندان",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/personal-care/mouth-teeth/"
+  },
+  {
+    "title": "بهداشت شخصی",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/personal-care/"
+  },
+  {
+    "title": "بیسکوویت",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/biscuit/"
+  },
+  {
+    "title": "پاک کننده و شوینده",
+    "url": "https://noon-valqalam.ir/product-category/skincare/cleanser/"
+  },
+  {
+    "title": "پسته احمد آقایی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/pistachios/pistachio-ahmad-aghaei/"
+  },
+  {
+    "title": "پسته اکبری",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/pistachios/pistachio-akbari/"
+  },
+  {
+    "title": "پسته بادامی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/pistachios/pistachio-badami/"
+  },
+  {
+    "title": "پسته کله قوچی",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/pistachios/pistachio-kalleh-ghouchi/"
+  },
+  {
+    "title": "پسته ها",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/pistachios/"
+  },
+  {
+    "title": "پنیر",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/cheese/"
+  },
+  {
+    "title": "پنیر",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/milk/"
+  },
+  {
+    "title": "پودر ژله",
+    "url": "https://noon-valqalam.ir/product-category/%d9%be%d9%88%d8%af%d8%b1-%da%98%d9%84%d9%87/"
+  },
+  {
+    "title": "پودر سوخاری",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/breadcrumbs/"
+  },
+  {
+    "title": "پودر شربت",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/syrup-powder/"
+  },
+  {
+    "title": "پودر شکلات",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/%d9%be%d9%88%d8%af%d8%b1-%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"
+  },
+  {
+    "title": "تخمه",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d8%aa%d8%ae%d9%85%d9%87/"
+  },
+  {
+    "title": "تراول ماگ",
+    "url": "https://noon-valqalam.ir/product-category/%d8%aa%d8%b1%d8%a7%d9%88%d9%84-%d9%85%d8%a7%da%af/"
+  },
+  {
+    "title": "تنقلات",
+    "url": "https://noon-valqalam.ir/product-category/snacks/"
+  },
+  {
+    "title": "توت",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/berry/"
+  },
+  {
+    "title": "جعبه کادویی زعفران",
+    "url": "https://noon-valqalam.ir/product-category/saffron/saffron-gift-pack/"
+  },
+  {
+    "title": "جو",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d8%ac%d9%88/"
+  },
+  {
+    "title": "جو و ماجی",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/jo-and-maji/"
+  },
+  {
+    "title": "چای",
+    "url": "https://noon-valqalam.ir/product-category/%da%86%d8%a7%db%8c-2/"
+  },
+  {
+    "title": "چای کرک",
+    "url": "https://noon-valqalam.ir/product-category/%da%86%d8%a7%db%8c-%da%a9%d8%b1%da%a9/"
+  },
+  {
+    "title": "چیپس",
+    "url": "https://noon-valqalam.ir/product-category/snacks/chips/"
+  },
+  {
+    "title": "حبه میوه ای",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/fruit-cubes/"
+  },
+  {
+    "title": "حبوبات",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d8%ad%d8%a8%d9%88%d8%a8%d8%a7%d8%aa/"
+  },
+  {
+    "title": "حلوا",
+    "url": "https://noon-valqalam.ir/product-category/%d8%ad%d9%84%d9%88%d8%a7/"
+  },
+  {
+    "title": "خرما",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/dates/"
+  },
+  {
+    "title": "خشکبار",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/"
+  },
+  {
+    "title": "خشکبار و آجیل",
+    "url": "https://noon-valqalam.ir/product-category/nuts/"
+  },
+  {
+    "title": "خوشبو کننده لباس",
+    "url": "https://noon-valqalam.ir/product-category/%d8%ae%d9%88%d8%b4%d8%a8%d9%88-%da%a9%d9%86%d9%86%d8%af%d9%87-%d9%84%d8%a8%d8%a7%d8%b3/"
+  },
+  {
+    "title": "خوشبو کننده هوا",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/perfume/air-freshner/"
+  },
+  {
+    "title": "دئودرانت و ضد تعریق",
+    "url": "https://noon-valqalam.ir/product-category//deodorant-spray/"
+  },
+  {
+    "title": "دئودرانت و ضد تعریق",
+    "url": "https://noon-valqalam.ir/product-category//deodorant-spray/women-men-care/deodorant/"
+  },
+  {
+    "title": "دئودرانت و ضد تعریق",
+    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/"
+  },
+  {
+    "title": "دسر",
+    "url": "https://noon-valqalam.ir/product-category/%d8%af%d8%b3%d8%b1/"
+  },
+  {
+    "title": "دمنوش",
+    "url": "https://noon-valqalam.ir/product-category/%d8%af%d9%85%d9%86%d9%88%d8%b4/"
+  },
+  {
+    "title": "دیگر محصولات",
+    "url": "https://noon-valqalam.ir/product-category/uncategorized/"
+  },
+  {
+    "title": "رمضان",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b1%d9%85%d8%b6%d8%a7%d9%86/"
+  },
+  {
+    "title": "روغن",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/oil/"
+  },
+  {
+    "title": "روغن زیتون",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/olive-oil/"
+  },
+  {
+    "title": "زرشک",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d8%b2%d8%b1%d8%b4%da%a9/"
+  },
+  {
+    "title": "زعفران",
+    "url": "https://noon-valqalam.ir/product-category/saffron/"
+  },
+  {
+    "title": "زعفران پنج گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/5g-saffron/"
+  },
+  {
+    "title": "زعفران چهار گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/4g-saffron-saffron/"
+  },
+  {
+    "title": "زعفران ده گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/10g-saffron/"
+  },
+  {
+    "title": "زعفران دو گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/2gr-saffron/"
+  },
+  {
+    "title": "زعفران دو مثقالی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/saffron-2-mesghal/"
+  },
+  {
+    "title": "زعفران سه گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/4g-saffron/"
+  },
+  {
+    "title": "زعفران نیم گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/%d8%b2%d8%b9%d9%81%d8%b1%d8%a7%d9%86-%d9%86%db%8c%d9%85-%da%af%d8%b1%d9%85%db%8c/"
+  },
+  {
+    "title": "زعفران نیم مثقالی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/saffron-nim-mesghal/"
+  },
+  {
+    "title": "زعفران یک گرمی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/1g-saffron/"
+  },
+  {
+    "title": "زعفران یک مثقالی",
+    "url": "https://noon-valqalam.ir/product-category/saffron/saffron-1-mesghal/"
+  },
+  {
+    "title": "زیبایی پوست",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b2%db%8c%d8%a8%d8%a7%db%8c%db%8c-%d9%be%d9%88%d8%b3%d8%aa/"
+  },
+  {
+    "title": "زیبایی مو",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/hair/hair-makeup/"
+  },
+  {
+    "title": "زیتون",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b2%db%8c%d8%aa%d9%88%d9%86/"
+  },
+  {
+    "title": "ژله",
+    "url": "https://noon-valqalam.ir/product-category/%da%98%d9%84%d9%87/"
+  },
+  {
+    "title": "ژله و کارامل",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/jelly-and-caramel/"
+  },
+  {
+    "title": "ساعت مچی",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b3%d8%a7%d8%b9%d8%aa-%d9%85%da%86%db%8c/"
+  },
+  {
+    "title": "سبزیجات",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-herbs/"
+  },
+  {
+    "title": "سرلاک",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b3%d8%b1%d9%84%d8%a7%da%a9/"
+  },
+  {
+    "title": "سس",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/sauce/"
+  },
+  {
+    "title": "سوغاتی",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/souvenir/"
+  },
+  {
+    "title": "سوهان",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b3%d9%88%d9%87%d8%a7%d9%86/"
+  },
+  {
+    "title": "سیروپ",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/syrup/"
+  },
+  {
+    "title": "شامپو",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/hair/shampoo/"
+  },
+  {
+    "title": "شربت",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b4%d8%b1%d8%a8%d8%aa/"
+  },
+  {
+    "title": "شکلات",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"
+  },
+  {
+    "title": "شکلات",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/chocolate/"
+  },
+  {
+    "title": "شلات",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b4%d9%84%d8%a7%d8%aa/"
+  },
+  {
+    "title": "شوینده",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/detergent/"
+  },
+  {
+    "title": "شیر خشک",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b4%db%8c%d8%b1-%d8%ae%d8%b4%da%a9/"
+  },
+  {
+    "title": "شیرینی",
+    "url": "https://noon-valqalam.ir/product-category/sweets/"
+  },
+  {
+    "title": "ضد آفتاب",
+    "url": "https://noon-valqalam.ir/product-category/skincare/sunscreen/"
+  },
+  {
+    "title": "ضدجوش",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b6%d8%af%d8%ac%d9%88%d8%b4/"
+  },
+  {
+    "title": "عرقیجات",
+    "url": "https://noon-valqalam.ir/product-category/%d8%b9%d8%b1%d9%82%db%8c%d8%ac%d8%a7%d8%aa/"
+  },
+  {
+    "title": "عطر جیبی",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/perfume/pocket-perfume/"
+  },
+  {
+    "title": "عطر و ادکلن",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/perfume/fragrance/"
+  },
+  {
+    "title": "عطر و اسپری",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/perfume/"
+  },
+  {
+    "title": "غلات صبحانه",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/cornflakes/"
+  },
+  {
+    "title": "فندق",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d9%81%d9%86%d8%af%d9%82/"
+  },
+  {
+    "title": "قالب موج",
+    "url": "https://noon-valqalam.ir/product-category/%d9%82%d8%a7%d9%84%d8%a8-%d9%85%d9%88%d8%ac/"
+  },
+  {
+    "title": "قرص قهوه",
+    "url": "https://noon-valqalam.ir/product-category/%d9%82%d8%b1%d8%b5-%d9%82%d9%87%d9%88%d9%87/"
+  },
+  {
+    "title": "قنادی",
+    "url": "https://noon-valqalam.ir/product-category/%d9%82%d9%86%d8%a7%d8%af%db%8c/"
+  },
+  {
+    "title": "قند",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d9%82%d9%86%d8%af/"
+  },
+  {
+    "title": "قهوه",
+    "url": "https://noon-valqalam.ir/product-category/coffee/"
+  },
+  {
+    "title": "قهوه فوری",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/instant-coffee/"
+  },
+  {
+    "title": "کادویی",
+    "url": "https://noon-valqalam.ir/product-category/%da%a9%d8%a7%d8%af%d9%88%db%8c%db%8c/"
+  },
+  {
+    "title": "کافی شاپ",
+    "url": "https://noon-valqalam.ir/product-category/cafe/"
+  },
+  {
+    "title": "کرم خوراکی",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/edible-cream/"
+  },
+  {
+    "title": "کرم دست",
+    "url": "https://noon-valqalam.ir/product-category/%da%a9%d8%b1%d9%85-%d8%af%d8%b3%d8%aa/"
+  },
+  {
+    "title": "کرم کارامل",
+    "url": "https://noon-valqalam.ir/product-category/%da%a9%d8%b1%d9%85-%da%a9%d8%a7%d8%b1%d8%a7%d9%85%d9%84/"
+  },
+  {
+    "title": "کشک",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%da%a9%d8%b4%da%a9/"
+  },
+  {
+    "title": "کشمش",
+    "url": "https://noon-valqalam.ir/product-category/nuts/dried-fruits/%da%a9%d8%b4%d9%85%d8%b4/"
+  },
+  {
+    "title": "کمپوت",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/compote/"
+  },
+  {
+    "title": "کمربند حرارتی",
+    "url": "https://noon-valqalam.ir/product-category/%da%a9%d9%85%d8%b1%d8%a8%d9%86%d8%af-%d8%ad%d8%b1%d8%a7%d8%b1%d8%aa%db%8c/"
+  },
+  {
+    "title": "کنجد",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%da%a9%d9%86%d8%ac%d8%af/"
+  },
+  {
+    "title": "گردو",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%da%af%d8%b1%d8%af%d9%88/"
+  },
+  {
+    "title": "گز",
+    "url": "https://noon-valqalam.ir/product-category/%da%af%d8%b2/"
+  },
+  {
+    "title": "لوازم آرایشی بهداشتی",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/"
+  },
+  {
+    "title": "لوازم اصلاح",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/personal-care/shaving-supplies/"
+  },
+  {
+    "title": "لوازم قنادی",
+    "url": "https://noon-valqalam.ir/product-category/confectionery/"
+  },
+  {
+    "title": "لوسیون",
+    "url": "https://noon-valqalam.ir/product-category/%d9%84%d9%88%d8%b3%db%8c%d9%88%d9%86/"
+  },
+  {
+    "title": "لوسیون بدن",
+    "url": "https://noon-valqalam.ir/product-category/%d9%84%d9%88%d8%b3%db%8c%d9%88%d9%86-%d8%a8%d8%af%d9%86/"
+  },
+  {
+    "title": "محصولات کادوئی",
+    "url": "https://noon-valqalam.ir/product-category/gifts/"
+  },
+  {
+    "title": "مراقبت از مو",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/hair/hair-care/"
+  },
+  {
+    "title": "مراقبت بدن",
+    "url": "https://noon-valqalam.ir/product-category/skincare/body-care/"
+  },
+  {
+    "title": "مراقبت پا",
+    "url": "https://noon-valqalam.ir/product-category/skincare/feet-care/"
+  },
+  {
+    "title": "مراقبت پوست",
+    "url": "https://noon-valqalam.ir/product-category/skincare/"
+  },
+  {
+    "title": "مراقبت چشم و ابرو",
+    "url": "https://noon-valqalam.ir/product-category/skincare/eye-care/"
+  },
+  {
+    "title": "مراقبت دست و ناخن",
+    "url": "https://noon-valqalam.ir/product-category/skincare/hand-nail-treat/"
+  },
+  {
+    "title": "مراقبت صورت",
+    "url": "https://noon-valqalam.ir/product-category/skincare/face-care/"
+  },
+  {
+    "title": "مراقبت لب",
+    "url": "https://noon-valqalam.ir/product-category/skincare/lip-care/"
+  },
+  {
+    "title": "مراقبت و زیبایی مو",
+    "url": "https://noon-valqalam.ir/product-category/cosmetics/hair/"
+  },
+  {
+    "title": "مغز پسته خام",
+    "url": "https://noon-valqalam.ir/product-category/nuts/nut/pistachios/raw-pistachio/"
+  },
+  {
+    "title": "مواد شوینده",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/%d9%85%d9%88%d8%a7%d8%af-%d8%b4%d9%88%db%8c%d9%86%d8%af%d9%87/"
+  },
+  {
+    "title": "میوه",
+    "url": "https://noon-valqalam.ir/product-category/%d9%85%db%8c%d9%88%d9%87/"
+  },
+  {
+    "title": "میوه خشک",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d9%85%db%8c%d9%88%d9%87-%d8%ae%d8%b4%da%a9/"
+  },
+  {
+    "title": "نبات",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d9%86%d8%a8%d8%a7%d8%aa/"
+  },
+  {
+    "title": "نخود",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d9%86%d8%ae%d9%88%d8%af/"
+  },
+  {
+    "title": "نسکافه",
+    "url": "https://noon-valqalam.ir/product-category/%d9%86%d8%b3%da%a9%d8%a7%d9%81%d9%87/"
+  },
+  {
+    "title": "نودل",
+    "url": "https://noon-valqalam.ir/product-category/%d9%86%d9%88%d8%af%d9%84/"
+  },
+  {
+    "title": "نودل",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/noodles/"
+  },
+  {
+    "title": "نوشیدنی",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/drink/"
+  },
+  {
+    "title": "هات چاکلت",
+    "url": "https://noon-valqalam.ir/product-category/%d9%87%d8%a7%d8%aa-%da%86%d8%a7%da%a9%d9%84%d8%aa/"
+  },
+  {
+    "title": "هایپرمارکت",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/"
+  },
+  {
+    "title": "هل",
+    "url": "https://noon-valqalam.ir/product-category/nuts/%d9%87%d9%84/"
+  },
+  {
+    "title": "وانیل",
+    "url": "https://noon-valqalam.ir/product-category/%d9%88%d8%a7%d9%86%db%8c%d9%84/"
+  },
+  {
+    "title": "وسایل برقی",
+    "url": "https://noon-valqalam.ir/product-category/%d9%88%d8%b3%d8%a7%db%8c%d9%84-%d8%a8%d8%b1%d9%82%db%8c/"
+  },
+  {
+    "title": "ویفر شکلات",
+    "url": "https://noon-valqalam.ir/product-category/hypermarket/%d9%88%db%8c%d9%81%d8%b1-%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"
+  }
+];
+
+const SPECIAL_INTERNAL_LINK_RULES: InternalLink[] = [
+  { title: 'قهوه', url: 'https://noon-valqalam.ir/product-category/coffee/', keywords: ['کافی میت', 'کافی‌میت', 'coffee mate', 'کریمر', 'کافی', 'کافه میت'] },
+  { title: 'قهوه فوری', url: 'https://noon-valqalam.ir/product-category/hypermarket/instant-coffee/', keywords: ['نسکافه', 'قهوه فوری', 'کاپوچینو', 'لاته فوری', 'هات چاکلت'] },
+  { title: 'گز', url: 'https://noon-valqalam.ir/product-category/%da%af%d8%b2/', keywords: ['گز', 'گز آردی', 'گز لقمه', 'گز پسته'] },
+  { title: 'سوهان', url: 'https://noon-valqalam.ir/product-category/%d8%b3%d9%88%d9%87%d8%a7%d9%86/', keywords: ['سوهان', 'سوهان عسلی', 'سوهان لقمه'] },
+  { title: 'پسته ها', url: 'https://noon-valqalam.ir/product-category/nuts/nut/pistachios/', keywords: ['پسته', 'مغز پسته', 'پسته اکبری', 'پسته احمد آقایی', 'پسته کله قوچی'] },
+  { title: 'خشکبار و آجیل', url: 'https://noon-valqalam.ir/product-category/nuts/', keywords: ['خشکبار', 'آجیل', 'اجیل', 'مغز', 'آجیل ترکیبی'] },
+  { title: 'زعفران', url: 'https://noon-valqalam.ir/product-category/saffron/', keywords: ['زعفران', 'مثقال', 'سرگل', 'نگین'] },
+  { title: 'شکلات', url: 'https://noon-valqalam.ir/product-category/%d8%b4%da%a9%d9%84%d8%a7%d8%aa/', keywords: ['شکلات', 'ویفر شکلات', 'کاکائو'] },
+  { title: 'چای', url: 'https://noon-valqalam.ir/product-category/%da%86%d8%a7%db%8c-2/', keywords: ['چای', 'چای کرک', 'تی بگ'] },
+  { title: 'قند', url: 'https://noon-valqalam.ir/product-category/nuts/%d9%82%d9%86%d8%af/', keywords: ['قند', 'کله قند'] },
+  { title: 'نبات', url: 'https://noon-valqalam.ir/product-category/nuts/%d9%86%d8%a8%d8%a7%d8%aa/', keywords: ['نبات', 'شاخه نبات'] },
+  { title: 'شیرینی', url: 'https://noon-valqalam.ir/product-category/sweets/', keywords: ['شیرینی', 'کیک', 'کلوچه'] },
+  { title: 'لوازم آرایشی بهداشتی', url: 'https://noon-valqalam.ir/product-category/cosmetics/', keywords: ['آرایشی', 'بهداشتی', 'لوازم آرایش'] },
+  { title: 'هایپرمارکت', url: 'https://noon-valqalam.ir/product-category/hypermarket/', keywords: ['هایپر', 'سوپرمارکت', 'مواد غذایی'] },
+];
+
+function normalizePersianText(value: string): string {
+  return (value || '')
+    .toLowerCase()
+    .replace(/ي/g, 'ی')
+    .replace(/ك/g, 'ک')
+    .replace(/آ/g, 'ا')
+    .replace(/[‌‌]/g, ' ')
+    .replace(/[^\p{L}\p{N}\s-]/gu, ' ')
+    .replace(/\s+/g, ' ')
+    .trim();
+}
+
+function decodeUrlForMatch(url: string): string {
+  try {
+    return decodeURIComponent(url);
+  } catch {
+    return url;
+  }
+}
+
+function getLinkTerms(link: InternalLink): string[] {
+  const decodedUrl = decodeUrlForMatch(link.url).replace(/https?:\/\/[^/]+/i, ' ');
+  const rawTerms = [
+    link.title,
+    ...(link.keywords || []),
+    ...link.title.split(/\s+/),
+    ...decodedUrl.split(/[\/\-_]+/),
+  ];
+
+  return Array.from(new Set(
+    rawTerms
+      .map(normalizePersianText)
+      .filter(term => term.length >= 3 && !['های', 'برای', 'محصول', 'محصولات', 'category', 'product'].includes(term))
+  ));
+}
+
+function pickInternalLink(productName: string, briefDescription: string, isNutsOrDriedFruit: boolean): InternalLink {
+  const haystack = normalizePersianText(`${productName} ${briefDescription}`);
+  const candidates = [...SPECIAL_INTERNAL_LINK_RULES, ...INTERNAL_LINKS];
+  let best: { link: InternalLink; score: number } | null = null;
+
+  for (const link of candidates) {
+    const terms = getLinkTerms(link);
+    let score = 0;
+
+    for (const term of terms) {
+      if (haystack.includes(term)) {
+        score += 10 + Math.min(term.length, 20);
+      }
+    }
+
+    if (SPECIAL_INTERNAL_LINK_RULES.includes(link) && score > 0) {
+      score += 80;
+    }
+
+    if (!best || score > best.score) {
+      best = { link, score };
+    }
+  }
+
+  if (best && best.score > 0) {
+    return best.link;
+  }
+
+  return isNutsOrDriedFruit
+    ? { title: 'خشکبار و آجیل', url: 'https://noon-valqalam.ir/product-category/nuts/' }
+    : { title: 'هایپرمارکت', url: 'https://noon-valqalam.ir/product-category/hypermarket/' };
+}
+
+function escapeHtmlAttribute(value: string): string {
+  return value.replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+function forceExactlyOneInternalLink(fullDescription: string, internalLink: InternalLink): string {
+  if (!fullDescription || typeof fullDescription !== 'string') {
+    return fullDescription;
+  }
+
+  const safeUrl = escapeHtmlAttribute(internalLink.url);
+  const safeTitle = internalLink.title.replace(/</g, '').replace(/>/g, '');
+  let anchorWasInserted = false;
+
+  // Remove all model-generated links first. If there is an existing anchor text, keep its text only.
+  let cleaned = fullDescription.replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, (_match, innerText) => innerText || safeTitle);
+
+  const sentence = ` برای مشاهده محصولات مرتبط، <a href="${safeUrl}">${safeTitle}</a> را ببینید.`;
+
+  cleaned = cleaned.replace(/<\/p>/i, () => {
+    if (anchorWasInserted) return '</p>';
+    anchorWasInserted = true;
+    return `${sentence}</p>`;
+  });
+
+  if (!anchorWasInserted) {
+    cleaned += `<p>${sentence.trim()}</p>`;
+  }
+
+  return cleaned;
+}
+
+
 export default async function handler(req: VercelRequest, res: VercelResponse) {
   if (req.method !== 'POST') {
     res.setHeader('Allow', ['POST']);
@@ -251,31 +1027,71 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const rawGatewayUrl = process.env.ARVAN_AI_GATEWAY_URL || process.env.AI_GATEWAY_URL || process.env.GEMINI_GATEWAY_URL;
     if (!rawGatewayUrl) {
-      return res.status(500).json({
-        message: 'AI Gateway URL is missing. Set ARVAN_AI_GATEWAY_URL in Vercel Environment Variables.'
-      });
+      return res.status(500).json({ message: 'AI Gateway URL is missing. Set ARVAN_AI_GATEWAY_URL in Vercel Environment Variables.' });
     }
 
-    const gatewayBaseUrl = rawGatewayUrl.replace(/\/+$/, '');
+    const rawApiKey = process.env.ARVAN_API_KEY || process.env.ARVAN_AI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.AI_GATEWAY_TOKEN;
+    if (!rawApiKey) {
+      return res.status(500).json({ message: 'Arvan API key is missing. Set ARVAN_API_KEY in Vercel Environment Variables.' });
+    }
+
+    const gatewayBaseUrl = rawGatewayUrl.trim().replace(/\/+$/, '');
     const chatCompletionsUrl = gatewayBaseUrl.endsWith('/chat/completions')
       ? gatewayBaseUrl
       : `${gatewayBaseUrl}/chat/completions`;
+    const normalizedApiKey = rawApiKey.trim().replace(/^apikey\s+/i, '');
 
     const description_generation_instruction = isNutsOrDriedFruit
       ? nuts_description_prompt
       : standard_description_prompt;
+      
+    const fullSystemInstruction = `${systemInstruction}\n\n# Rules for 'fullDescription' field:\n${description_generation_instruction}`;
+    const selectedInternalLink = pickInternalLink(productName, briefDescription, isNutsOrDriedFruit);
 
-    const fullSystemInstruction = `${systemInstruction}\n\n# Rules for 'fullDescription' field:\n${description_generation_instruction}\n\n# JSON shape\nReturn only a valid JSON object with these exact keys: correctedProductName, englishProductName, fullDescription, shortDescription, seoTitle, slug, focusKeyword, metaDescription, altImageText, advancedSeoAnalysis. advancedSeoAnalysis must include: keyphraseSynonyms, lsiKeywords, longTailKeywords, semanticEntities, searchIntent, internalLinkingSuggestions.`;
+    // Arvan AI Gateway is OpenAI-compatible and does not use Google's responseSchema directly.
+    // This instruction mirrors the original productSchema field names and descriptions.
+    const responseSchemaInstruction = `
+# ساختار خروجی دقیقاً مثل نسخه اصلی
+خروجی باید فقط یک JSON Object معتبر باشد و هیچ متن یا Markdown خارج از JSON برنگردان.
+تمام کلیدهای زیر دقیقاً اجباری هستند:
+
+{
+  "correctedProductName": "نام فارسی صحیح و کامل محصول که از روی تصویر تشخیص داده شده است. اگر نام ورودی کاربر صحیح بود، همان نام را برگردان. در صورت عدم وجود تصویر، بر اساس نام ورودی، نام کامل را حدس بزن.",
+  "englishProductName": "نام انگلیسی دقیق محصول که از روی تصویر تشخیص داده شده یا بر اساس دانش عمومی حدس زده شده است.",
+  "fullDescription": "توضیحات کامل محصول با فرمت HTML. این توضیحات باید با یک پاراگراف مقدمه جذاب شروع شود که شامل نام محصول به صورت **bold** است. بخش‌های مختلف باید با تیترهای مشخص از هم جدا شوند.",
+  "shortDescription": "یک جمله کوتاه، خلاصه و جذاب برای توضیحات کوتاه محصول (بین ۲۰ تا ۳۰ کلمه). از هیچ‌گونه قالب‌بندی مانند bold یا strong استفاده نکن.",
+  "seoTitle": "عنوان سئو جذاب و بهینه (حداکثر ۶۰ کاراکتر) شامل کلیدواژه کانونی و کلمات کلیدی مانند 'خرید' یا 'قیمت'.",
+  "slug": "نامک (slug) سئو شده و تمیز فقط به زبان انگلیسی برای URL.",
+  "focusKeyword": "کلیدواژه کانونی اصلی محصول (به فارسی).",
+  "metaDescription": "توضیحات متا جذاب برای گوگل (بین ۱۲۰ تا ۱۵۵ کاراکتر) که شامل کلیدواژه کانونی، یک مزیت کلیدی و یک فراخوان به اقدام (CTA) باشد. از هیچ‌گونه قالب‌بندی مانند bold یا strong استفاده نکن.",
+  "altImageText": "متن جایگزین (alt text) توصیفی و بهینه برای تصویر محصول (حداکثر ۱۰ کلمه) که شامل کلیدواژه کانونی باشد.",
+  "advancedSeoAnalysis": {
+    "keyphraseSynonyms": ["آرایه‌ای از حداقل ۳ عبارت کلیدی مترادف یا مرتبط."],
+    "lsiKeywords": ["آرایه‌ای از کلیدواژه‌های معنایی مرتبط (LSI)."],
+    "longTailKeywords": ["آرایه‌ای از ۲ تا ۳ عبارت کلیدی دم‌بلند و دقیق‌تر."],
+    "semanticEntities": ["موجودیت‌های معنایی کلیدی مانند برند، دسته‌بندی محصول، و ویژگی‌های اصلی."],
+    "searchIntent": "هدف جستجوی کاربر (مثلاً: خرید، مقایسه، اطلاعاتی).",
+    "internalLinkingSuggestions": ["کلمات یا عبارات پیشنهادی برای لینک‌دهی داخلی به صفحات مرتبط."]
+  }
+}
+
+قوانین مهم:
+- کلیدها را تغییر نده.
+- هیچ فیلدی را حذف نکن.
+- fullDescription باید همان متن کامل HTML طبق Rules for fullDescription باشد، نه خلاصه. داخل fullDescription خودت هیچ تگ <a> نساز؛ سیستم بعداً دقیقاً یک لینک داخلی واقعی اضافه می‌کند.
+- اگر محصول آجیل و خشکبار است، ساختار مخصوص آجیل و خشکبار را کامل اجرا کن.
+- اگر محصول عادی است، ساختار داینامیک محصول عادی را کامل اجرا کن.
+`;
+
+    const arvanSystemInstruction = `${fullSystemInstruction}\n\n${responseSchemaInstruction}`;
 
     const userContent: any[] = [];
-
+    
     let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:\n- نام محصول: "${productName}"`;
     if (briefDescription) {
-      userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
+        userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
     }
-
-    userContent.push({ type: 'text', text: userPrompt });
-
+    
     if (productImage) {
       userContent.push({
         type: 'image_url',
@@ -283,60 +1099,30 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           url: `data:${productImage.mimeType};base64,${productImage.base64}`,
         },
       });
-      userContent.push({
-        type: 'text',
-        text: 'از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن.',
-      });
+      userPrompt += "\n- از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن."
     }
 
-    const rawApiKey = process.env.ARVAN_API_KEY || process.env.ARVAN_AI_API_KEY || process.env.AI_GATEWAY_API_KEY || process.env.AI_GATEWAY_TOKEN;
-    if (!rawApiKey) {
-      return res.status(500).json({
-        message: 'Arvan API key is missing. Set ARVAN_API_KEY in Vercel Environment Variables.'
-      });
-    }
+    userContent.push({ type: 'text', text: userPrompt });
 
-    // ArvanCloud AIaaS documentation requires: Authorization: apikey ****
-    // You may paste either the whole value starting with "apikey " or only the key itself.
-    const normalizedApiKey = rawApiKey.trim().replace(/^apikey\s+/i, '');
-
-    const headers: Record<string, string> = {
-      'Content-Type': 'application/json',
-      'Authorization': `apikey ${normalizedApiKey}`,
-    };
-
-    const requestPayload: any = {
-      model: process.env.ARVAN_AI_MODEL || 'Gemini-2.5-Flash',
-      messages: [
-        { role: 'system', content: fullSystemInstruction },
-        { role: 'user', content: userContent },
-      ],
-      temperature: 0.4,
-      response_format: { type: 'json_object' },
-    };
-
-    let gatewayResponse = await fetch(chatCompletionsUrl, {
+    const gatewayResponse = await fetch(chatCompletionsUrl, {
       method: 'POST',
-      headers,
-      body: JSON.stringify(requestPayload),
+      headers: {
+        'Content-Type': 'application/json',
+        'Authorization': `apikey ${normalizedApiKey}`,
+      },
+      body: JSON.stringify({
+        model: process.env.ARVAN_AI_MODEL || 'Gemini-2.5-Flash',
+        messages: [
+          { role: 'system', content: arvanSystemInstruction },
+          { role: 'user', content: userContent },
+        ],
+        max_tokens: Number(process.env.ARVAN_MAX_TOKENS || 6000),
+      }),
     });
 
-    let gatewayText = await gatewayResponse.text();
-
-    // Some gateways do not support OpenAI's response_format field. Retry once without it.
-    if (!gatewayResponse.ok && /response_format|json_object|unsupported|unknown/i.test(gatewayText)) {
-      delete requestPayload.response_format;
-      gatewayResponse = await fetch(chatCompletionsUrl, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(requestPayload),
-      });
-      gatewayText = await gatewayResponse.text();
-    }
+    const gatewayText = await gatewayResponse.text();
     if (!gatewayResponse.ok) {
-      return res.status(gatewayResponse.status).json({
-        message: `AI Gateway Error: ${gatewayText}`,
-      });
+      return res.status(gatewayResponse.status).json({ message: `AI Gateway Error: ${gatewayText}` });
     }
 
     let gatewayData: any;
@@ -371,6 +1157,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       }
       generatedData = JSON.parse(match[0]);
     }
+
+    generatedData.fullDescription = forceExactlyOneInternalLink(generatedData.fullDescription, selectedInternalLink);
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(generatedData);
