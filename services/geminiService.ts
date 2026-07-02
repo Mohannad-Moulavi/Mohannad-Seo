@@ -7,13 +7,17 @@ export const generateProductContent = async (
   isNutsOrDriedFruit: boolean,
 ): Promise<ProductData> => {
   try {
+    const controller = new AbortController();
+    const timeoutId = window.setTimeout(() => controller.abort(), 85000);
+
     const response = await fetch('/api/generate', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({ productName, productImage, briefDescription, isNutsOrDriedFruit }),
-    });
+      signal: controller.signal,
+    }).finally(() => window.clearTimeout(timeoutId));
 
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({ message: 'An unknown server error occurred.' }));
@@ -26,8 +30,10 @@ export const generateProductContent = async (
     return data;
   } catch (error) {
     console.error("Error calling backend API:", error);
+    if (error instanceof DOMException && error.name === 'AbortError') {
+        throw new Error('زمان پاسخ‌گویی سرور طولانی شد. دوباره تلاش کنید یا تصویر محصول را حذف کنید.');
+    }
     if (error instanceof Error) {
-        // Re-throw a more user-friendly message
         throw new Error(`${error.message}`);
     }
     throw new Error("یک خطای ناشناخته در ارتباط با سرور رخ داد.");

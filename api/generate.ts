@@ -132,7 +132,7 @@ const nuts_description_prompt = `
 - **طول متن:** کل توضیحات باید بین ۲۲۰ تا ۳۰۰ کلمه باشد.
 - **خوانایی:** جملات باید کوتاه و روان باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** در متن، یک عبارت کلیدی مناسب را به یک محصول یا دسته‌بندی مرتبط لینک بده (مثلاً: "برای مشاهده همه پسته‌ها کلیک کنید"). این لینک باید به صورت یک تگ \`<a>\` با \`href="#"\` و متنی توصیفی باشد.
+- **لینک‌سازی داخلی:** لینک داخلی توسط سیستم پس از تولید متن اضافه می‌شود. در متن هیچ تگ `<a>`، هیچ `href="#"` و هیچ جمله‌ای مانند «برای مشاهده محصولات مرتبط»، «کلیک کنید» یا پیشنهاد لینک داخلی ننویس.
 
 # 2. ساختار و فرمت متن (بسیار مهم)
 - توضیحات باید با یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه شروع شود. **این پاراگراف نباید هیچ تیتری داشته باشد.**
@@ -195,7 +195,7 @@ const standard_description_prompt = `
 - **پاراگراف‌ها:** یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه بنویس. سایر پاراگراف‌ها باید بین ۴۰ تا ۶۰ کلمه باشند.
 - **خوانایی:** جملات باید کوتاه (حداکثر ۲۰ کلمه) باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول (۵۰ کلمه ابتدایی) بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** در متن، یک عبارت کلیدی مناسب را به یک محصول یا دسته‌بندی مرتبط لینک بده (به صورت یک تگ \`<a>\` با \`href="#"\` و متنی توصیفی).
+- **لینک‌سازی داخلی:** لینک داخلی توسط سیستم پس از تولید متن اضافه می‌شود. در متن هیچ تگ `<a>`، هیچ `href="#"` و هیچ جمله‌ای مانند «برای مشاهده محصولات مرتبط»، «کلیک کنید» یا پیشنهاد لینک داخلی ننویس.
 
 # 2. ساختار و فرمت متن
 - **بخش‌های تطبیقی (Dynamic Sections):** ساختار بخش‌ها باید **بر اساس نوع محصول** هوشمندانه انتخاب شود. هر بخش باید با یک تیتر \`<h5>\` همراه با یک ایموجی مناسب شروع شود (مثال: \`<h5>✅ ویژگی‌های اصلی:</h5>\`). **بخش‌های نامرتبط را به صورت خودکار حذف کن.**
@@ -244,82 +244,208 @@ type InternalCategory = {
   title: string;
   url: string;
   keywords: string[];
+  group: 'beauty' | 'food' | 'other';
+  priority: number;
 };
 
 const SITE_ORIGIN = 'https://noon-valqalam.ir';
 
 const categoryUrl = (path: string): string => {
-  const cleanPath = path.trim().replace(/^\/+/, '').replace(/\/{2,}/g, '/');
+  const cleanPath = String(path || '').trim().replace(/^\/+/, '').replace(/\/{2,}/g, '/');
   return `${SITE_ORIGIN}/${cleanPath}${cleanPath.endsWith('/') ? '' : '/'}`;
 };
 
 const INTERNAL_CATEGORIES: InternalCategory[] = [
   {
-    title: 'مراقبت پوست',
-    url: categoryUrl('product-category/skincare/'),
-    keywords: ['پوست', 'ضد آفتاب', 'ضدآفتاب', 'ضدجوش', 'جوش', 'آبرسان', 'مرطوب کننده', 'مرطوب‌کننده', 'کرم صورت', 'کرم دست', 'کرم دور چشم', 'دور چشم', 'تونر', 'میسلار', 'پاک کننده', 'پاک‌کننده', 'شوینده صورت', 'ژل شستشو', 'سرم صورت', 'ماسک صورت', 'لوسیون', 'اسکراب صورت']
+    title: 'شامپو',
+    url: categoryUrl('product-category/cosmetics/hair/shampoo/'),
+    group: 'beauty',
+    priority: 120,
+    keywords: [
+      'شامپو', 'شامپو مو', 'شامپو سر', 'شامپو بدن', 'شامپو ضد شوره', 'ضد شوره', 'شوره',
+      'shampoo', 'anti dandruff', 'clear shampoo'
+    ]
   },
   {
-    title: 'مراقبت و زیبایی مو',
-    url: categoryUrl('product-category/cosmetics/hair/'),
-    keywords: ['شامپو', 'ماسک مو', 'مو', 'اسکراب مو', 'سرم مو', 'نرم کننده مو', 'نرم‌کننده مو', 'حالت دهنده مو', 'رنگ مو', 'کراتین']
+    title: 'مراقبت از مو',
+    url: categoryUrl('product-category/cosmetics/hair/hair-care/'),
+    group: 'beauty',
+    priority: 100,
+    keywords: [
+      'نرم کننده مو', 'نرم‌کننده مو', 'ماسک مو', 'اسکراب مو', 'سرم مو', 'روغن مو', 'تونیک مو',
+      'حالت دهنده مو', 'حالت‌دهنده مو', 'ژل مو', 'واکس مو', 'اسپری مو', 'کراتین',
+      'مراقبت مو', 'مراقبت از مو', 'conditioner', 'hair mask', 'hair serum', 'hair oil', 'hair care'
+    ]
+  },
+  {
+    title: 'زیبایی مو',
+    url: categoryUrl('product-category/cosmetics/hair/hair-makeup/'),
+    group: 'beauty',
+    priority: 98,
+    keywords: [
+      'رنگ مو', 'اکسیدان', 'دکلره', 'زیبایی مو', 'hair color', 'hair dye'
+    ]
   },
   {
     title: 'عطر و اسپری',
     url: categoryUrl('product-category/cosmetics/perfume/'),
-    keywords: ['عطر', 'ادکلن', 'ادوپرفیوم', 'ادوتویلت', 'پرفیوم', 'فرگرنس', 'عطر جیبی']
+    group: 'beauty',
+    priority: 95,
+    keywords: [
+      'عطر', 'ادکلن', 'ادوپرفیوم', 'ادو پرفیوم', 'ادوتویلت', 'ادو تویلت', 'پرفیوم', 'فرگرنس',
+      'عطر جیبی', 'اسپری خوشبو کننده بدن', 'خوشبو کننده بدن', 'perfume', 'fragrance', 'cologne', 'eau de parfum', 'eau de toilette'
+    ]
+  },
+  {
+    title: 'مراقبت پوست',
+    url: categoryUrl('product-category/skincare/'),
+    group: 'beauty',
+    priority: 90,
+    keywords: [
+      'پوست', 'مراقبت پوست', 'ضد آفتاب', 'ضدآفتاب', 'ضدجوش', 'جوش', 'آبرسان', 'مرطوب کننده',
+      'مرطوب‌کننده', 'کرم صورت', 'کرم دور چشم', 'دور چشم', 'تونر', 'میسلار', 'پاک کننده صورت',
+      'پاک‌کننده صورت', 'شیر پاک کن', 'شیرپاک کن', 'شیرپاک‌کن', 'پاک کن آرایش', 'پاک‌کن آرایش', 'شوینده صورت', 'ژل شستشو', 'فوم شستشو', 'سرم صورت', 'ماسک صورت', 'لوسیون',
+      'اسکراب صورت', 'کرم دست', 'skincare', 'skin care', 'sunscreen', 'acne', 'moisturizer', 'cleanser', 'toner', 'serum'
+    ]
   },
   {
     title: 'لوازم آرایشی بهداشتی',
     url: categoryUrl('product-category/cosmetics/'),
-    keywords: ['دئودرانت', 'ضد تعریق', 'ضدتعریق', 'مام', 'رول ضد تعریق', 'اسپری بدن', 'بادی اسپلش', 'خوشبو کننده', 'خوشبوکننده', 'رژ', 'ریمل', 'خط چشم', 'ابرو', 'آرایش', 'کرم پودر', 'پنکک', 'کانسیلر', 'لاک', 'ناخن', 'لوازم آرایشی', 'بهداشتی']
+    group: 'beauty',
+    priority: 80,
+    keywords: [
+      'دئودرانت', 'دئودورانت', 'ضد تعریق', 'ضدتعریق', 'مام', 'رول ضد تعریق', 'اسپری بدن',
+      'بادی اسپلش', 'خوشبو کننده', 'خوشبوکننده', 'بهداشت شخصی', 'بهداشتی', 'لوازم بهداشتی',
+      'رژ', 'رژلب', 'رژ لب', 'ریمل', 'خط چشم', 'مداد چشم', 'ابرو', 'آرایش', 'کرم پودر',
+      'پنکک', 'کانسیلر', 'لاک', 'ناخن', 'لوازم آرایشی', 'makeup', 'cosmetic', 'cosmetics',
+      'deodorant', 'antiperspirant', 'body spray', 'body splash'
+    ]
   },
   {
     title: 'گز',
     url: categoryUrl('product-category/%da%af%d8%b2/'),
+    group: 'food',
+    priority: 75,
     keywords: ['گز']
   },
   {
     title: 'سوهان',
     url: categoryUrl('product-category/%d8%b3%d9%88%d9%87%d8%a7%d9%86/'),
+    group: 'food',
+    priority: 75,
     keywords: ['سوهان']
   },
   {
     title: 'زعفران',
     url: categoryUrl('product-category/saffron/'),
-    keywords: ['زعفران']
+    group: 'food',
+    priority: 75,
+    keywords: ['زعفران', 'saffron']
   },
   {
     title: 'قهوه',
     url: categoryUrl('product-category/coffee/'),
-    keywords: ['قهوه', 'نسکافه', 'کافی میت', 'کافی‌میت', 'کاپوچینو', 'لاته', 'هات چاکلت', 'موکا', 'اسپرسو']
+    group: 'food',
+    priority: 75,
+    keywords: ['قهوه', 'نسکافه', 'کافی میت', 'کافی‌میت', 'کاپوچینو', 'لاته', 'هات چاکلت', 'موکا', 'اسپرسو', 'coffee', 'nescafe', 'coffee mate', 'cappuccino', 'latte', 'hot chocolate', 'espresso']
   },
   {
     title: 'شیرینی',
     url: categoryUrl('product-category/sweets/'),
-    keywords: ['شیرینی', 'کیک', 'کلوچه', 'کوکی', 'باقلوا']
+    group: 'food',
+    priority: 70,
+    keywords: ['شیرینی', 'کیک', 'کلوچه', 'کوکی', 'باقلوا', 'sweet', 'cake', 'cookie']
   },
   {
     title: 'لوازم قنادی',
     url: categoryUrl('product-category/confectionery/'),
+    group: 'food',
+    priority: 65,
     keywords: ['لوازم قنادی', 'قالب', 'وانیل', 'پودر ژله', 'ژله', 'کرم کارامل', 'پودر کیک', 'خامه قنادی']
   },
   {
     title: 'خشکبار و آجیل',
     url: categoryUrl('product-category/nuts/'),
+    group: 'food',
+    priority: 85,
     keywords: ['آجیل', 'خشکبار', 'پسته', 'بادام', 'گردو', 'فندق', 'تخمه', 'بادام هندی', 'بادام زمینی', 'کشمش', 'خرما', 'انجیر خشک', 'میوه خشک', 'نبات', 'قند', 'ارده', 'کنجد', 'کشک', 'حبوبات', 'ادویه', 'زرشک', 'هل']
   },
   {
-    title: 'هایپرمارکت',
-    url: categoryUrl('product-category/hypermarket/'),
-    keywords: ['شکلات', 'چیپس', 'بیسکویت', 'بیسکوویت', 'ویفر', 'نوشیدنی', 'نودل', 'سس', 'روغن', 'برنج', 'پنیر', 'شیر', 'غلات', 'آدامس', 'آبنبات', 'کمپوت', 'شربت', 'دسر', 'سوپرمارکت', 'هایپرمارکت']
-  }
+    title: 'پنیر',
+    url: categoryUrl('product-category/hypermarket/cheese/'),
+    group: 'food',
+    priority: 90,
+    keywords: ['پنیر', 'cheese']
+  },
+  {
+    title: 'شکلات',
+    url: categoryUrl('product-category/%d8%b4%da%a9%d9%84%d8%a7%d8%aa/'),
+    group: 'food',
+    priority: 90,
+    keywords: ['شکلات', 'chocolate']
+  },
+  {
+    title: 'چیپس',
+    url: categoryUrl('product-category/snacks/chips/'),
+    group: 'food',
+    priority: 85,
+    keywords: ['چیپس', 'chips']
+  },
+  {
+    title: 'بیسکویت',
+    url: categoryUrl('product-category/hypermarket/biscuit/'),
+    group: 'food',
+    priority: 85,
+    keywords: ['بیسکویت', 'بیسکوویت', 'biscuit', 'biscuits']
+  },
+  {
+    title: 'نوشیدنی',
+    url: categoryUrl('product-category/hypermarket/drink/'),
+    group: 'food',
+    priority: 85,
+    keywords: ['نوشیدنی', 'آبمیوه', 'نوشابه', 'ماءالشعیر', 'انرژی زا', 'انرژی‌زا', 'drink', 'beverage']
+  },
+  {
+    title: 'نودل',
+    url: categoryUrl('product-category/hypermarket/noodles/'),
+    group: 'food',
+    priority: 85,
+    keywords: ['نودل', 'noodle', 'noodles']
+  },
+  {
+    title: 'سس',
+    url: categoryUrl('product-category/hypermarket/sauce/'),
+    group: 'food',
+    priority: 80,
+    keywords: ['سس', 'sauce']
+  },
+  {
+    title: 'روغن',
+    url: categoryUrl('product-category/hypermarket/oil/'),
+    group: 'food',
+    priority: 80,
+    keywords: ['روغن خوراکی', 'روغن مایع', 'روغن سرخ کردنی', 'edible oil', 'cooking oil']
+  },
 ];
+
+const HYPERMARKET_FALLBACK_CATEGORY: InternalCategory = {
+  title: 'هایپرمارکت',
+  url: categoryUrl('product-category/hypermarket/'),
+  group: 'food',
+  priority: 10,
+  keywords: []
+};
+
+const getCategory = (title: string): InternalCategory => {
+  if (title === HYPERMARKET_FALLBACK_CATEGORY.title) return HYPERMARKET_FALLBACK_CATEGORY;
+  return INTERNAL_CATEGORIES.find(item => item.title === title)!;
+};
 
 const normalizeText = (value: unknown): string => String(value || '')
   .toLowerCase()
   .replace(/[ي]/g, 'ی')
   .replace(/[ك]/g, 'ک')
+  .replace(/[أإآ]/g, 'ا')
   .replace(/[‌\u200c]/g, ' ')
   .replace(/\s+/g, ' ')
   .trim();
@@ -328,6 +454,8 @@ const normalizeUrl = (url: string): string => {
   const trimmed = String(url || '').trim();
   try {
     const parsed = new URL(trimmed);
+    parsed.protocol = 'https:';
+    parsed.hostname = 'noon-valqalam.ir';
     parsed.pathname = parsed.pathname.replace(/\/{2,}/g, '/');
     if (!parsed.pathname.endsWith('/')) parsed.pathname += '/';
     parsed.search = '';
@@ -338,28 +466,107 @@ const normalizeUrl = (url: string): string => {
   }
 };
 
-const pickInternalCategory = (data: any, productName: string, briefDescription: string, isNutsOrDriedFruit: boolean): InternalCategory => {
+const countKeywordMatches = (text: string, keywords: string[]): number => {
+  return keywords.reduce((score, keyword) => {
+    const normalizedKeyword = normalizeText(keyword);
+    if (!normalizedKeyword) return score;
+    if (text.includes(normalizedKeyword)) return score + Math.max(1, normalizedKeyword.split(' ').length);
+    return score;
+  }, 0);
+};
+
+const hasBeautySignal = (text: string): boolean => {
+  const beautySignals = [
+    'شامپو', 'شامپو مو', 'شامپو بدن', 'ضد شوره', 'ماسک مو', 'سرم مو', 'نرم کننده مو', 'نرم‌کننده مو',
+    'رنگ مو', 'اکسیدان', 'دکلره', 'کراتین', 'پوست', 'کرم صورت', 'کرم دست', 'کرم دور چشم',
+    'ضد آفتاب', 'ضدآفتاب', 'مرطوب کننده', 'مرطوب‌کننده', 'آبرسان', 'شوینده صورت',
+    'ژل شستشو', 'فوم شستشو', 'تونر', 'میسلار', 'شیر پاک کن', 'پاک کن آرایش',
+    'آرایش', 'آرایشی', 'لوازم آرایشی', 'بهداشتی', 'لوازم بهداشتی', 'عطر', 'ادکلن',
+    'دئودرانت', 'دئودورانت', 'ضد تعریق', 'ضدتعریق', 'مام', 'اسپری بدن', 'بادی اسپلش',
+    'لاک', 'رژ', 'ریمل', 'خط چشم', 'cosmetic', 'cosmetics', 'makeup', 'skincare',
+    'skin care', 'shampoo', 'hair mask', 'perfume', 'fragrance', 'deodorant'
+  ];
+  return beautySignals.some(signal => countKeywordMatches(text, [signal]) > 0);
+};
+
+const hasFoodSignal = (text: string): boolean => {
+  const foodSignals = [
+    'خوراکی', 'مواد غذایی', 'غذایی', 'تنقلات', 'سوپرمارکتی', 'سوپر مارکتی', 'صبحانه',
+    'نوشیدنی', 'آبمیوه', 'نوشابه', 'دلستر', 'ماءالشعیر', 'انرژی زا', 'انرژی‌زا',
+    'شکلات', 'بیسکویت', 'بیسکوویت', 'ویفر', 'کیک', 'کلوچه', 'چیپس', 'پفک', 'اسنک',
+    'آدامس', 'آبنبات', 'پنیر', 'ماست', 'کره', 'خامه', 'شیر', 'دوغ', 'لبنیات',
+    'رب', 'سس', 'ماکارونی', 'نودل', 'برنج', 'روغن خوراکی', 'روغن مایع', 'قند', 'شکر',
+    'چای', 'دمنوش', 'قهوه', 'نسکافه', 'کافی میت', 'هات چاکلت', 'زعفران', 'گز', 'سوهان',
+    'آجیل', 'خشکبار', 'پسته', 'بادام', 'گردو', 'خرما', 'کشمش', 'حبوبات', 'ادویه',
+    'food', 'snack', 'drink', 'beverage', 'chocolate', 'biscuit', 'chips', 'cheese',
+    'milk', 'yogurt', 'sauce', 'noodle', 'rice', 'tea', 'coffee'
+  ];
+  return foodSignals.some(signal => countKeywordMatches(text, [signal]) > 0);
+};
+
+const pickInternalCategory = (data: any, productName: string, briefDescription: string, isNutsOrDriedFruit: boolean): InternalCategory | null => {
   if (isNutsOrDriedFruit) {
-    return INTERNAL_CATEGORIES.find(item => item.title === 'خشکبار و آجیل')!;
+    return getCategory('خشکبار و آجیل');
   }
 
-  const haystack = normalizeText([
-    productName,
-    briefDescription,
+  const userText = normalizeText([productName, briefDescription].filter(Boolean).join(' '));
+  const modelText = normalizeText([
     data?.correctedProductName,
     data?.englishProductName,
     data?.focusKeyword,
+    data?.seoTitle,
+    data?.metaDescription,
     ...(Array.isArray(data?.advancedSeoAnalysis?.semanticEntities) ? data.advancedSeoAnalysis.semanticEntities : []),
     ...(Array.isArray(data?.advancedSeoAnalysis?.lsiKeywords) ? data.advancedSeoAnalysis.lsiKeywords : [])
   ].filter(Boolean).join(' '));
+  const allText = `${userText} ${modelText}`.trim();
+
+  // قوانین قطعی: این دسته‌ها دقیق و شناخته‌شده‌اند و نباید به دسته مادر یا هایپرمارکت بروند.
+  if (/\b(shampoo|anti dandruff)\b/i.test(allText) || allText.includes('شامپو') || allText.includes('ضد شوره')) {
+    return getCategory('شامپو');
+  }
+  if (allText.includes('پنیر') || /\bcheese\b/i.test(allText)) {
+    return getCategory('پنیر');
+  }
+  if (allText.includes('شکلات') || /\bchocolate\b/i.test(allText)) {
+    return getCategory('شکلات');
+  }
+  if (allText.includes('عطر') || allText.includes('ادکلن') || /\b(perfume|fragrance|cologne)\b/i.test(allText)) {
+    return getCategory('عطر و اسپری');
+  }
+
+  let bestCategory: InternalCategory | null = null;
+  let bestScore = 0;
 
   for (const category of INTERNAL_CATEGORIES) {
-    if (category.keywords.some(keyword => haystack.includes(normalizeText(keyword)))) {
-      return category;
+    if (category.title === 'هایپرمارکت') continue;
+    const userScore = countKeywordMatches(userText, category.keywords) * 10;
+    const modelScore = countKeywordMatches(modelText, category.keywords) * 3;
+    const totalScore = userScore + modelScore + (userScore || modelScore ? category.priority / 100 : 0);
+
+    if (totalScore > bestScore) {
+      bestScore = totalScore;
+      bestCategory = category;
     }
   }
 
-  return INTERNAL_CATEGORIES.find(item => item.title === 'هایپرمارکت')!;
+  if (bestCategory && bestScore > 0) {
+    if (bestCategory.title === 'هایپرمارکت') return HYPERMARKET_FALLBACK_CATEGORY;
+    return bestCategory;
+  }
+
+  // اگر محصول آرایشی/بهداشتی است ولی دسته دقیق ندارد، به دسته مادر آرایشی‌بهداشتی لینک بده.
+  if (hasBeautySignal(allText)) {
+    return getCategory('لوازم آرایشی بهداشتی');
+  }
+
+  // اگر محصول خوراکی/سوپرمارکتی است ولی دسته دقیق و معروف ندارد، فقط در این حالت به هایپرمارکت لینک بده.
+  if (hasFoodSignal(allText)) {
+    return HYPERMARKET_FALLBACK_CATEGORY;
+  }
+
+  // برای محصول نامطمئن لینک داخلی بی‌ربط نگذار.
+  return null;
 };
 
 const stripAllAnchors = (html: string): string => {
@@ -372,11 +579,48 @@ const stripAllAnchors = (html: string): string => {
   return output;
 };
 
+const removeDangerousHtml = (html: string): string => {
+  return String(html || '')
+    .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+    .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+    .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '')
+    .replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '')
+    .replace(/<embed\b[^>]*>/gi, '')
+    .replace(/<form\b[^>]*>[\s\S]*?<\/form>/gi, '')
+    .replace(/<input\b[^>]*>/gi, '')
+    .replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+    .replace(/href\s*=\s*("|')\s*javascript:[\s\S]*?\1/gi, 'href="#"');
+};
+
+const removeModelInternalLinkSentences = (html: string): string => {
+  let output = String(html || '');
+
+  // مدل حق لینک‌سازی ندارد. هر جمله‌ای که بوی لینک داخلی/کلیک/مشاهده دسته‌بندی بدهد حذف می‌شود.
+  output = output
+    .replace(/[^<>.!؟。]*(برای\s+مشاهده|محصولات\s+مرتبط|دسته\s*بندی|دسته\s+|کلیک\s+کنید|اینجا\s+کلیک|لینک\s+داخلی)[^<>.!؟。]*(?:[.!؟。]|$)/gi, '')
+    .replace(/<a\b[^>]*>([\s\S]*?)<\/a>/gi, '$1');
+
+  // مدل نباید خودش لینک‌سازی کند. اگر خودش هایپرمارکت/سوپرمارکت را بی‌دلیل داخل متن آورد، جمله مدل حذف می‌شود.
+  // لینک نهایی هایپرمارکت فقط وقتی محصول واقعاً خوراکی باشد، بعداً توسط کد اضافه می‌شود.
+  const marketTerms = '(?:هایپر\\s*مارکت|هایپرمارکت|سوپر\\s*مارکت|سوپرمارکت|hypermarket|supermarket)';
+  const marketSentenceRegex = new RegExp(`[^<>.!؟。]*${marketTerms}[^<>.!؟。]*(?:[.!؟。]|$)`, 'gi');
+  output = output.replace(marketSentenceRegex, '');
+
+  // پاکسازی نهایی اگر کلمه تنها باقی مانده باشد.
+  output = output
+    .replace(/(?:هایپر\s*مارکت|هایپرمارکت|سوپر\s*مارکت|سوپرمارکت|hypermarket|supermarket)/gi, '')
+    .replace(/\s{2,}/g, ' ')
+    .replace(/<p>\s*<\/p>/gi, '')
+    .replace(/<li>\s*<\/li>/gi, '');
+
+  return output;
+};
+
 const addSingleInternalLink = (html: string, category: InternalCategory): string => {
   const safeTitle = category.title;
   const safeUrl = normalizeUrl(category.url);
   const linkSentence = ` همچنین برای مشاهده محصولات مرتبط، دسته <a href="${safeUrl}">${safeTitle}</a> را ببینید.`;
-  const withoutLinks = stripAllAnchors(html);
+  const withoutLinks = removeModelInternalLinkSentences(removeDangerousHtml(stripAllAnchors(html)));
 
   if (/<p\b[^>]*>[\s\S]*?<\/p>/i.test(withoutLinks)) {
     return withoutLinks.replace(/(<p\b[^>]*>[\s\S]*?)(<\/p>)/i, (_match, start, end) => `${start}${linkSentence}${end}`);
@@ -387,7 +631,7 @@ const addSingleInternalLink = (html: string, category: InternalCategory): string
 
 const buildSchemaInstruction = (): string => `
 # ساختار خروجی JSON الزامی
-فقط و فقط یک JSON معتبر برگردان. هیچ متن، توضیح، مارک‌داون یا کدبلاک بیرون JSON ننویس.
+فقط و فقط یک JSON معتبر برگردان. هیچ متن، توضیح، مارک‌داون یا کدبلاک بیرون JSON ننویس. در fullDescription هیچ لینک داخلی، جمله پیشنهادی لینک‌سازی، کلیک کنید یا مشاهده دسته‌بندی ننویس.
 کلیدهای JSON باید دقیقاً این‌ها باشند:
 - correctedProductName: string
 - englishProductName: string
@@ -408,7 +652,7 @@ const getArvanGatewayEndpoint = (): string => {
   }
 
   const cleanGatewayUrl = gatewayUrl.trim().replace(/\/+$/, '');
-  return `${cleanGatewayUrl}/chat/completions`;
+  return cleanGatewayUrl.endsWith('/chat/completions') ? cleanGatewayUrl : `${cleanGatewayUrl}/chat/completions`;
 };
 
 const getArvanAuthorizationHeader = (): string | undefined => {
@@ -430,6 +674,49 @@ const extractJsonText = (value: string): string => {
   }
 
   return text;
+};
+
+const toText = (value: unknown, fallback = ''): string => {
+  if (typeof value === 'string') return value;
+  if (value === null || value === undefined) return fallback;
+  return String(value);
+};
+
+const toStringArray = (value: unknown): string[] => {
+  if (Array.isArray(value)) {
+    return value.map(item => toText(item).trim()).filter(Boolean);
+  }
+  if (typeof value === 'string' && value.trim()) {
+    return value.split(/[،,\n]/).map(item => item.trim()).filter(Boolean);
+  }
+  return [];
+};
+
+const normalizeGeneratedProductData = (value: any, productName: string): any => {
+  const data = value && typeof value === 'object' ? value : {};
+  const analysis = data.advancedSeoAnalysis && typeof data.advancedSeoAnalysis === 'object'
+    ? data.advancedSeoAnalysis
+    : {};
+
+  return {
+    correctedProductName: toText(data.correctedProductName, productName),
+    englishProductName: toText(data.englishProductName, ''),
+    fullDescription: toText(data.fullDescription, `<p>${productName}</p>`),
+    shortDescription: toText(data.shortDescription, ''),
+    seoTitle: toText(data.seoTitle, productName),
+    slug: toText(data.slug, ''),
+    focusKeyword: toText(data.focusKeyword, productName),
+    metaDescription: toText(data.metaDescription, ''),
+    altImageText: toText(data.altImageText, productName),
+    advancedSeoAnalysis: {
+      keyphraseSynonyms: toStringArray(analysis.keyphraseSynonyms),
+      lsiKeywords: toStringArray(analysis.lsiKeywords),
+      longTailKeywords: toStringArray(analysis.longTailKeywords),
+      semanticEntities: toStringArray(analysis.semanticEntities),
+      searchIntent: toText(analysis.searchIntent, 'خرید'),
+      internalLinkingSuggestions: toStringArray(analysis.internalLinkingSuggestions),
+    },
+  };
 };
 
 
@@ -454,7 +741,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 
     const contentParts: ArvanContentPart[] = [];
     
-    let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:\n- نام محصول: "${productName}"`;
+    let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:
+- نام محصول: "${productName}"
+- هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.`;
     if (briefDescription) {
         userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
     }
@@ -484,7 +773,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       method: 'POST',
       headers,
       body: JSON.stringify({
-        model: process.env.ARVAN_MODEL || 'Gemini-2.5-Flash',
+        model: process.env.ARVAN_AI_MODEL || process.env.ARVAN_MODEL || 'Gemini-2.5-Flash',
         messages: [
           { role: 'system', content: fullSystemInstruction },
           { role: 'user', content: contentParts },
@@ -507,9 +796,16 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       throw new Error('AI Gateway did not return a valid text response.');
     }
     
-    const generatedData = JSON.parse(extractJsonText(rawContent));
+    const parsedData = JSON.parse(extractJsonText(rawContent));
+    const generatedData = normalizeGeneratedProductData(parsedData, productName);
     const selectedCategory = pickInternalCategory(generatedData, productName, briefDescription, isNutsOrDriedFruit);
-    generatedData.fullDescription = addSingleInternalLink(generatedData.fullDescription, selectedCategory);
+    generatedData.fullDescription = removeModelInternalLinkSentences(removeDangerousHtml(stripAllAnchors(generatedData.fullDescription)));
+    if (selectedCategory) {
+      generatedData.fullDescription = addSingleInternalLink(generatedData.fullDescription, selectedCategory);
+      generatedData.advancedSeoAnalysis.internalLinkingSuggestions = [selectedCategory.title];
+    } else {
+      generatedData.advancedSeoAnalysis.internalLinkingSuggestions = [];
+    }
 
     res.setHeader('Content-Type', 'application/json');
     res.status(200).json(generatedData);

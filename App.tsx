@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { ProductData, ImageFile } from './types';
 import { generateProductContent } from './services/geminiService';
 import Loader from './components/Loader';
@@ -107,6 +107,71 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ image, setImage }) => {
   );
 };
 
+
+const sanitizeHtmlForPreview = (html: string): string => {
+    if (typeof html !== 'string') return '';
+
+    const fallbackSanitize = (value: string) => value
+        .replace(/<\/?(?:html|head|body|meta|link|base|title)[^>]*>/gi, '')
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '')
+        .replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '')
+        .replace(/<embed\b[^>]*>/gi, '')
+        .replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        .replace(/\s+style\s*=\s*("[^"]*"|'[^']*')/gi, '')
+        .replace(/href\s*=\s*("|')\s*javascript:[\s\S]*?\1/gi, 'href="#"');
+
+    try {
+        if (typeof document === 'undefined') return fallbackSanitize(html);
+
+        const allowedTags = new Set(['P', 'STRONG', 'B', 'EM', 'I', 'UL', 'OL', 'LI', 'H4', 'H5', 'HR', 'A', 'BR', 'SPAN']);
+        const template = document.createElement('template');
+        template.innerHTML = fallbackSanitize(html);
+
+        const cleanNode = (node: Node) => {
+            const children = Array.from(node.childNodes);
+            for (const child of children) {
+                if (child.nodeType === Node.ELEMENT_NODE) {
+                    const element = child as HTMLElement;
+                    const tagName = element.tagName.toUpperCase();
+
+                    if (!allowedTags.has(tagName)) {
+                        const fragment = document.createDocumentFragment();
+                        while (element.firstChild) fragment.appendChild(element.firstChild);
+                        element.replaceWith(fragment);
+                        cleanNode(node);
+                        continue;
+                    }
+
+                    for (const attr of Array.from(element.attributes)) {
+                        const attrName = attr.name.toLowerCase();
+                        const attrValue = attr.value || '';
+                        const isSafeHref = tagName === 'A' && attrName === 'href' && /^https:\/\/noon-valqalam\.ir\//i.test(attrValue);
+
+                        if (isSafeHref) {
+                            element.setAttribute('href', attrValue.replace(/([^:])\/{2,}/g, '$1/'));
+                            element.setAttribute('target', '_blank');
+                            element.setAttribute('rel', 'noopener noreferrer');
+                            continue;
+                        }
+
+                        element.removeAttribute(attr.name);
+                    }
+
+                    cleanNode(element);
+                }
+            }
+        };
+
+        cleanNode(template.content);
+        return template.innerHTML;
+    } catch (error) {
+        console.error('Preview sanitizer failed:', error);
+        return fallbackSanitize(html);
+    }
+};
+
 interface OutputSectionProps {
     label: string;
     content: React.ReactNode;
@@ -143,7 +208,7 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
             </div>
             <div className="text-gray-300 whitespace-pre-wrap font-sans">
                 {isHtml && typeof content === 'string' ? (
-                    <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+                    <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtmlForPreview(content) }} />
                 ) : (
                    content
                 )}
@@ -167,7 +232,17 @@ const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ titl
 );
 
 
-const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }> = ({ analysis }) => {
+const normalizeAdvancedSeoAnalysis = (analysis?: Partial<ProductData['advancedSeoAnalysis']> | null): ProductData['advancedSeoAnalysis'] => ({
+    keyphraseSynonyms: Array.isArray(analysis?.keyphraseSynonyms) ? analysis!.keyphraseSynonyms.filter(Boolean) : [],
+    lsiKeywords: Array.isArray(analysis?.lsiKeywords) ? analysis!.lsiKeywords.filter(Boolean) : [],
+    longTailKeywords: Array.isArray(analysis?.longTailKeywords) ? analysis!.longTailKeywords.filter(Boolean) : [],
+    semanticEntities: Array.isArray(analysis?.semanticEntities) ? analysis!.semanticEntities.filter(Boolean) : [],
+    searchIntent: typeof analysis?.searchIntent === 'string' ? analysis.searchIntent : '',
+    internalLinkingSuggestions: Array.isArray(analysis?.internalLinkingSuggestions) ? analysis!.internalLinkingSuggestions.filter(Boolean) : [],
+});
+
+const AdvancedSeoTabs: React.FC<{ analysis?: Partial<ProductData['advancedSeoAnalysis']> | null }> = ({ analysis }) => {
+    const safeAnalysis = normalizeAdvancedSeoAnalysis(analysis);
     const [activeTab, setActiveTab] = useState('keywords');
 
     const tabs = {
@@ -180,10 +255,10 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
         switch (activeTab) {
             case 'keywords': {
                 const allKeywords = [
-                    ...(analysis.keyphraseSynonyms || []),
-                    ...(analysis.lsiKeywords || []),
-                    ...(analysis.longTailKeywords || []),
-                    ...(analysis.semanticEntities || []),
+                    ...(safeAnalysis.keyphraseSynonyms || []),
+                    ...(safeAnalysis.lsiKeywords || []),
+                    ...(safeAnalysis.longTailKeywords || []),
+                    ...(safeAnalysis.semanticEntities || []),
                 ].filter(Boolean);
 
                 return (
@@ -203,11 +278,11 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
                 return (
                     <div>
                         <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
-                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{analysis.searchIntent}</p>
+                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{safeAnalysis.searchIntent || 'نامشخص'}</p>
                     </div>
                 );
             case 'linking':
-                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={analysis.internalLinkingSuggestions} />;
+                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={safeAnalysis.internalLinkingSuggestions} />;
             default:
                 return null;
         }
@@ -239,6 +314,81 @@ const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }
     );
 };
 
+
+class AppErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; message: string }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: '' };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error?.message || 'خطای نمایش خروجی' };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('UI render error:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex items-center justify-center">
+          <div className="max-w-xl bg-gray-800/70 border border-red-500/40 rounded-xl p-6 text-center">
+            <h1 className="text-2xl font-bold text-red-300 mb-3">خطا در نمایش خروجی</h1>
+            <p className="text-gray-300 mb-4">خروجی ناقص یا غیرمنتظره برگشته بود، ولی صفحه دیگر خالی نمی‌شود. یک بار دوباره تولید محتوا را بزنید.</p>
+            <p className="text-xs text-gray-500 break-words">{this.state.message}</p>
+            <button
+              onClick={() => this.setState({ hasError: false, message: '' })}
+              className="mt-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              برگشت به برنامه
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+
+
+const RuntimeErrorBanner: React.FC = () => {
+  const [runtimeError, setRuntimeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      setRuntimeError(event.message || 'خطای اجرای صفحه');
+    };
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason instanceof Error ? event.reason.message : String(event.reason || 'خطای ارتباط یا پردازش');
+      setRuntimeError(reason);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
+  if (!runtimeError) return null;
+
+  return (
+    <div className="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-lg z-50 bg-red-950/95 border border-red-500/70 text-white rounded-xl shadow-2xl p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-bold text-red-200 mb-1">خطای موقت در نمایش یا ارتباط</p>
+          <p className="text-sm text-red-100 break-words">{runtimeError}</p>
+          <p className="text-xs text-red-200/70 mt-2">صفحه نباید خالی شود؛ دوباره دکمه تولید را بزنید یا اگر تکرار شد متن خطا را بفرستید.</p>
+        </div>
+        <button onClick={() => setRuntimeError(null)} className="text-red-100 hover:text-white text-xl leading-none">×</button>
+      </div>
+    </div>
+  );
+};
 
 // --- Main App Component ---
 
@@ -394,13 +544,13 @@ function App() {
                         content={<AdvancedSeoTabs analysis={generatedContent.advancedSeoAnalysis} />}
                         copyText={
                            `Keywords: ${[
-                                ...(generatedContent.advancedSeoAnalysis.keyphraseSynonyms || []),
-                                ...(generatedContent.advancedSeoAnalysis.lsiKeywords || []),
-                                ...(generatedContent.advancedSeoAnalysis.longTailKeywords || []),
-                                ...(generatedContent.advancedSeoAnalysis.semanticEntities || []),
+                                ...(generatedContent.advancedSeoAnalysis?.keyphraseSynonyms || []),
+                                ...(generatedContent.advancedSeoAnalysis?.lsiKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis?.longTailKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis?.semanticEntities || []),
                             ].filter(Boolean).join(', ')}\n` +
-                            `Search Intent: ${generatedContent.advancedSeoAnalysis.searchIntent}\n` +
-                            `Internal Linking Suggestions: ${generatedContent.advancedSeoAnalysis.internalLinkingSuggestions.join(', ')}`
+                            `Search Intent: ${generatedContent.advancedSeoAnalysis?.searchIntent || ''}\n` +
+                            `Internal Linking Suggestions: ${(generatedContent.advancedSeoAnalysis?.internalLinkingSuggestions || []).join(', ')}`
                         }
                     />
                 </div>
@@ -412,6 +562,7 @@ function App() {
             <p>ساخته شده با 🧠 و ❤️ توسط Mohannad</p>
         </footer>
       </div>
+      <RuntimeErrorBanner />
        <style>{`
           .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
@@ -476,4 +627,10 @@ function App() {
   );
 }
 
-export default App;
+export default function RootApp() {
+  return (
+    <AppErrorBoundary>
+      <App />
+    </AppErrorBoundary>
+  );
+}
