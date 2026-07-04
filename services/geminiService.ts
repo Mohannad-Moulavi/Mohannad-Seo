@@ -20,9 +20,23 @@ export const generateProductContent = async (
     }).finally(() => window.clearTimeout(timeoutId));
 
     if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: 'An unknown server error occurred.' }));
-      // Use the server's message, but have a fallback.
-      const errorMessage = errorData.message || `Error ${response.status}: ${response.statusText}`;
+      const contentType = response.headers.get('content-type') || '';
+      let errorMessage = '';
+
+      if (contentType.includes('application/json')) {
+        const errorData = await response.json().catch(() => null);
+        errorMessage = errorData?.message || errorData?.error || '';
+      } else {
+        const errorText = await response.text().catch(() => '');
+        errorMessage = errorText.replace(/<[^>]+>/g, ' ').replace(/\s+/g, ' ').trim().slice(0, 900);
+      }
+
+      if (!errorMessage) {
+        errorMessage = response.status === 504
+          ? 'زمان اجرای تابع سرور تمام شد. دوباره تلاش کنید یا تصویر محصول را حذف کنید.'
+          : `خطای سرور ${response.status}: ${response.statusText || 'بدون توضیح'}`;
+      }
+
       throw new Error(errorMessage);
     }
 

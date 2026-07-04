@@ -27,6 +27,11 @@ interface VercelResponse {
   end: (body?: string) => void;
 }
 
+// زمان بیشتری برای تولید محتوای AI روی Vercel. اگر پلن محدودتر باشد، حداقل خطای واضح برمی‌گردد.
+export const config = {
+  maxDuration: 60,
+};
+
 
 const advancedSeoAnalysisSchema = {
     type: Type.OBJECT,
@@ -132,7 +137,7 @@ const nuts_description_prompt = `
 - **طول متن:** کل توضیحات باید بین ۲۲۰ تا ۳۰۰ کلمه باشد.
 - **خوانایی:** جملات باید کوتاه و روان باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** لینک داخلی توسط سیستم پس از تولید متن اضافه می‌شود. در متن هیچ تگ `<a>`، هیچ `href="#"` و هیچ جمله‌ای مانند «برای مشاهده محصولات مرتبط»، «کلیک کنید» یا پیشنهاد لینک داخلی ننویس.
+- **لینک‌سازی داخلی:** لینک داخلی توسط سیستم پس از تولید متن اضافه می‌شود. در متن هیچ تگ \`<a>\`، هیچ \`href="#"\` و هیچ جمله‌ای مانند «برای مشاهده محصولات مرتبط»، «کلیک کنید» یا پیشنهاد لینک داخلی ننویس.
 
 # 2. ساختار و فرمت متن (بسیار مهم)
 - توضیحات باید با یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه شروع شود. **این پاراگراف نباید هیچ تیتری داشته باشد.**
@@ -195,7 +200,7 @@ const standard_description_prompt = `
 - **پاراگراف‌ها:** یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه بنویس. سایر پاراگراف‌ها باید بین ۴۰ تا ۶۰ کلمه باشند.
 - **خوانایی:** جملات باید کوتاه (حداکثر ۲۰ کلمه) باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول (۵۰ کلمه ابتدایی) بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
-- **لینک‌سازی داخلی:** لینک داخلی توسط سیستم پس از تولید متن اضافه می‌شود. در متن هیچ تگ `<a>`، هیچ `href="#"` و هیچ جمله‌ای مانند «برای مشاهده محصولات مرتبط»، «کلیک کنید» یا پیشنهاد لینک داخلی ننویس.
+- **لینک‌سازی داخلی:** لینک داخلی توسط سیستم پس از تولید متن اضافه می‌شود. در متن هیچ تگ \`<a>\`، هیچ \`href="#"\` و هیچ جمله‌ای مانند «برای مشاهده محصولات مرتبط»، «کلیک کنید» یا پیشنهاد لینک داخلی ننویس.
 
 # 2. ساختار و فرمت متن
 - **بخش‌های تطبیقی (Dynamic Sections):** ساختار بخش‌ها باید **بر اساس نوع محصول** هوشمندانه انتخاب شود. هر بخش باید با یک تیتر \`<h5>\` همراه با یک ایموجی مناسب شروع شود (مثال: \`<h5>✅ ویژگی‌های اصلی:</h5>\`). **بخش‌های نامرتبط را به صورت خودکار حذف کن.**
@@ -683,6 +688,94 @@ const getArvanAuthorizationHeader = (): string | undefined => {
   return cleanKey.toLowerCase().startsWith('apikey ') ? cleanKey : `apikey ${cleanKey}`;
 };
 
+
+const sleep = (ms: number): Promise<void> => new Promise(resolve => setTimeout(resolve, ms));
+
+const extractGatewayErrorMessage = (body: any, fallback: string): string => {
+  if (!body) return fallback;
+  if (typeof body === 'string') return body;
+  if (body.error?.message) return String(body.error.message);
+  if (body.message) return String(body.message);
+  if (body.detail) return String(body.detail);
+  try {
+    return JSON.stringify(body);
+  } catch {
+    return fallback;
+  }
+};
+
+const readResponseBody = async (response: Response): Promise<any> => {
+  const contentType = response.headers.get('content-type') || '';
+  if (contentType.includes('application/json')) {
+    return response.json().catch(() => null);
+  }
+  const text = await response.text().catch(() => '');
+  return text || null;
+};
+
+const shouldRetryStatus = (status: number): boolean => [408, 409, 425, 429, 500, 502, 503, 504].includes(status);
+
+const callArvanGateway = async (
+  endpoint: string,
+  headers: Record<string, string>,
+  payload: Record<string, any>,
+  options: { timeoutMs?: number; retries?: number } = {}
+): Promise<any> => {
+  const timeoutMs = options.timeoutMs ?? 52000;
+  const retries = options.retries ?? 2;
+  let lastError: Error | null = null;
+
+  for (let attempt = 0; attempt <= retries; attempt += 1) {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), timeoutMs);
+    const payloadForAttempt = { ...payload };
+
+    // بعضی Gatewayها response_format را قبول نمی‌کنند؛ در تلاش دوم بدون آن امتحان می‌کنیم.
+    if (attempt > 0) {
+      delete payloadForAttempt.response_format;
+    }
+
+    try {
+      const response = await fetch(endpoint, {
+        method: 'POST',
+        headers,
+        body: JSON.stringify(payloadForAttempt),
+        signal: controller.signal,
+      });
+      clearTimeout(timeoutId);
+
+      const responseBody = await readResponseBody(response);
+
+      if (response.ok) {
+        return responseBody;
+      }
+
+      const detail = extractGatewayErrorMessage(responseBody, response.statusText || 'AI Gateway Error');
+      lastError = new Error(`AI Gateway Error ${response.status}: ${detail}`);
+
+      const mentionsResponseFormat = detail.toLowerCase().includes('response_format');
+      if (!shouldRetryStatus(response.status) && !(attempt === 0 && mentionsResponseFormat)) {
+        throw lastError;
+      }
+    } catch (error) {
+      clearTimeout(timeoutId);
+      if (error instanceof DOMException && error.name === 'AbortError') {
+        lastError = new Error('AI Gateway timeout: پاسخ آروان دیر رسید و درخواست متوقف شد.');
+      } else if (error instanceof Error) {
+        lastError = error;
+      } else {
+        lastError = new Error('AI Gateway network error.');
+      }
+    }
+
+    if (attempt < retries) {
+      await sleep(900 * (attempt + 1));
+    }
+  }
+
+  throw lastError || new Error('AI Gateway failed without details.');
+};
+
 const extractJsonText = (value: string): string => {
   let text = String(value || '').trim();
   text = text.replace(/^```(?:json)?\s*/i, '').replace(/```$/i, '').trim();
@@ -763,9 +856,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:
 - نام محصول: "${productName}"
-- هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.`;
+- هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.
+- هشدار مهم دسته‌بندی: هایپرمارکت فقط مخصوص خوراکی‌ها و محصولات سوپرمارکتی است. اگر محصول آرایشی، بهداشتی، شامپو، عطر، پوست یا مو بود، به هیچ عنوان هایپرمارکت را داخل متن نیاور.`;
     if (briefDescription) {
-        userPrompt += `\n- توضیحات اولیه: "${briefDescription}"`;
+        userPrompt += `
+- توضیحات اولیه: "${briefDescription}"`;
     }
     
     if (productImage) {
@@ -775,10 +870,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
           url: `data:${productImage.mimeType};base64,${productImage.base64}`,
         },
       });
-      userPrompt += "\n- از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن."
+      userPrompt += "\n- از تصویر ارائه شده برای تشخیص نام دقیق فارسی و انگلیسی و جزئیات محصول استفاده کن.";
     }
 
     contentParts.push({ type: 'text', text: userPrompt });
+    const userMessageContent: string | ArvanContentPart[] = productImage ? contentParts : userPrompt;
 
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -789,34 +885,31 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       headers.Authorization = authorizationHeader;
     }
 
-    const response = await fetch(getArvanGatewayEndpoint(), {
-      method: 'POST',
-      headers,
-      body: JSON.stringify({
-        model: process.env.ARVAN_AI_MODEL || process.env.ARVAN_MODEL || 'Gemini-2.5-Flash',
-        messages: [
-          { role: 'system', content: fullSystemInstruction },
-          { role: 'user', content: contentParts },
-        ],
-        temperature: Number(process.env.ARVAN_TEMPERATURE || 0.4),
-        max_tokens: Number(process.env.ARVAN_MAX_TOKENS || 6000),
-        response_format: { type: 'json_object' },
-      }),
+    const responseBody = await callArvanGateway(getArvanGatewayEndpoint(), headers, {
+      model: process.env.ARVAN_AI_MODEL || process.env.ARVAN_MODEL || 'Gemini-2.5-Flash',
+      messages: [
+        { role: 'system', content: fullSystemInstruction },
+        { role: 'user', content: userMessageContent },
+      ],
+      temperature: Number(process.env.ARVAN_TEMPERATURE || 0.4),
+      max_tokens: Number(process.env.ARVAN_MAX_TOKENS || 5500),
+      response_format: { type: 'json_object' },
     });
 
-    const responseBody = await response.json().catch(() => null);
-
-    if (!response.ok) {
-      const detail = responseBody ? JSON.stringify(responseBody) : response.statusText;
-      throw new Error(`AI Gateway Error: ${detail}`);
-    }
-
-    const rawContent = responseBody?.choices?.[0]?.message?.content;
+    const messageContent = responseBody?.choices?.[0]?.message?.content;
+    const rawContent = Array.isArray(messageContent)
+      ? messageContent.map((part: any) => part?.text || part?.content || '').join('\n')
+      : messageContent;
     if (!rawContent || typeof rawContent !== 'string') {
       throw new Error('AI Gateway did not return a valid text response.');
     }
     
-    const parsedData = JSON.parse(extractJsonText(rawContent));
+    let parsedData: any;
+    try {
+      parsedData = JSON.parse(extractJsonText(rawContent));
+    } catch (parseError) {
+      throw new Error(`AI Gateway returned invalid JSON: ${rawContent.slice(0, 700)}`);
+    }
     const generatedData = normalizeGeneratedProductData(parsedData, productName);
     const selectedCategory = pickInternalCategory(generatedData, productName, briefDescription, isNutsOrDriedFruit);
 
