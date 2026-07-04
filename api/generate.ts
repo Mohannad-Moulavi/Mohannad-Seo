@@ -74,11 +74,11 @@ const productSchema = {
   properties: {
     correctedProductName: {
       type: Type.STRING,
-      description: "نام فارسی صحیح و کامل محصول که از روی تصویر تشخیص داده شده است. اگر نام ورودی کاربر صحیح بود، همان نام را برگردان. در صورت عدم وجود تصویر، بر اساس نام ورودی، نام کامل را حدس بزن.",
+      description: "نام فارسی صحیح، کوتاه و فروشگاهی محصول. اگر حجم، وزن، تعداد یا واحدهایی مثل ml، میلی‌لیتر، گرم، oz روی تصویر یا ورودی وجود دارد، حتماً در نام محصول بیاور. فقط یک ویژگی مهم و کوتاه محصول را اضافه کن و نام را تبلیغاتی یا خیلی بلند نکن.",
     },
     englishProductName: {
       type: Type.STRING,
-      description: "نام انگلیسی دقیق محصول که از روی تصویر تشخیص داده شده یا بر اساس دانش عمومی حدس زده شده است.",
+      description: "نام انگلیسی دقیق محصول. اگر حجم، وزن، تعداد، ml، g یا oz در تصویر یا ورودی وجود دارد، در نام انگلیسی هم حفظ شود؛ اما نام طولانی و تبلیغاتی نشود.",
     },
     fullDescription: {
       type: Type.STRING,
@@ -128,6 +128,14 @@ const systemInstruction = `
 تو یک متخصص ارشد سئو (SEO) و تولید محتوا برای فروشگاه‌های اینترنتی در ایران هستی. وظیفه تو تولید محتوای کامل و بهینه برای صفحه محصول وردپرس، مطابق با سخت‌گیرانه‌ترین اصول افزونه Yoast SEO است.
 تمام خروجی‌ها باید به زبان فارسی روان، جذاب و کاملاً یونیک (غیرکپی) باشد.
 داده‌های خروجی باید در قالب یک آبجکت JSON و مطابق با اسکیمای ارائه‌شده بازگردانده شوند. به هیچ وجه نباید هیچ متنی خارج از ساختار JSON برگردانی.
+
+# قانون مهم نام محصول
+- فیلد correctedProductName باید کوتاه، دقیق و مناسب عنوان محصول وردپرس باشد؛ نه خیلی خلاصه و نه خیلی بلند.
+- قالب پیشنهادی: نوع محصول + ویژگی کلیدی کوتاه + برند + حجم/وزن/تعداد اگر در تصویر یا ورودی وجود دارد.
+- حجم/وزن/تعداد مثل 400ml، 13.5oz، 250 گرم، ۱۵ میلی‌لیتر یا ۱۲ عددی اگر روی محصول دیده شد یا کاربر نوشت، حتماً حفظ شود.
+- فقط ۱ یا نهایتاً ۲ ویژگی واقعاً مهم را در نام بیاور؛ مثل بدون سولفات، شی باتر، ضد شوره، مخصوص موهای فر، آبرسان، SPF50.
+- از کلمات تبلیغاتی اضافه مثل بهترین، فوق‌العاده، عالی، تضمینی، ویژه و جمله‌های طولانی در نام محصول استفاده نکن.
+- طول correctedProductName ترجیحاً بین ۴۰ تا ۷۵ کاراکتر باشد.
 `;
 
 const nuts_description_prompt = `
@@ -197,6 +205,7 @@ const standard_description_prompt = `
 
 # 1. قوانین کلی محتوا (Yoast SEO)
 - **طول متن:** کل توضیحات باید بین ۲۵۰ تا ۳۵۰ کلمه باشد.
+- **جزئیات مهم محصول:** اگر روی تصویر یا ورودی حجم، وزن، تعداد، رایحه، مدل، SPF، نوع مو/پوست، بدون سولفات، بدون شکر، کشور سازنده یا ویژگی مهمی وجود دارد، در بخش مشخصات محصول یا ویژگی‌های اصلی حتماً بیاور.
 - **پاراگراف‌ها:** یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه بنویس. سایر پاراگراف‌ها باید بین ۴۰ تا ۶۰ کلمه باشند.
 - **خوانایی:** جملات باید کوتاه (حداکثر ۲۰ کلمه) باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول (۵۰ کلمه ابتدایی) بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
@@ -658,8 +667,8 @@ const buildSchemaInstruction = (): string => `
 # ساختار خروجی JSON الزامی
 فقط و فقط یک JSON معتبر برگردان. هیچ متن، توضیح، مارک‌داون یا کدبلاک بیرون JSON ننویس. در fullDescription هیچ لینک داخلی، جمله پیشنهادی لینک‌سازی، کلیک کنید یا مشاهده دسته‌بندی ننویس.
 کلیدهای JSON باید دقیقاً این‌ها باشند:
-- correctedProductName: string
-- englishProductName: string
+- correctedProductName: string؛ نام فارسی کوتاه و دقیق محصول؛ شامل نوع محصول + ویژگی مهم کوتاه + برند + حجم/وزن/تعداد اگر در ورودی یا تصویر وجود دارد؛ ترجیحاً ۴۰ تا ۷۵ کاراکتر و بدون متن تبلیغاتی
+- englishProductName: string؛ نام انگلیسی دقیق محصول، با حفظ حجم/وزن/oz/ml اگر وجود دارد
 - fullDescription: string؛ HTML کامل مطابق قوانین بالا
 - shortDescription: string؛ بدون bold و بدون HTML
 - seoTitle: string؛ حداکثر ۶۰ کاراکتر
@@ -805,6 +814,78 @@ const toStringArray = (value: unknown): string[] => {
   return [];
 };
 
+
+const normalizeProductNameSpaces = (value: string): string => String(value || '')
+  .replace(/[\n\t]+/g, ' ')
+  .replace(/\s+/g, ' ')
+  .replace(/\s+([،,.])/g, '$1')
+  .trim();
+
+const extractProductMeasurements = (text: string): string[] => {
+  const source = String(text || '');
+  const number = '[0-9۰-۹]+(?:[.,٫][0-9۰-۹]+)?';
+  const unit = '(?:fl\.?\s*oz|oz|اونس|ml|mL|ML|میلی\s*لیتر|میل|l|L|لیتر|g|G|گرم|kg|KG|کیلو\s*گرم|کیلوگرم|عدد|عددی|تایی|تا|حبه|بسته)';
+  const regex = new RegExp(`${number}\s*${unit}`, 'gi');
+  const matches = source.match(regex) || [];
+  const unique: string[] = [];
+  for (const item of matches) {
+    const cleaned = normalizeProductNameSpaces(item);
+    const key = normalizeText(cleaned);
+    if (cleaned && !unique.some(existing => normalizeText(existing) === key)) {
+      unique.push(cleaned);
+    }
+  }
+  return unique.slice(0, 2);
+};
+
+const productNameHasMeasurement = (name: string, measurement: string): boolean => {
+  const normalizedName = normalizeText(name).replace(/\s+/g, '');
+  const normalizedMeasurement = normalizeText(measurement).replace(/\s+/g, '');
+  return normalizedName.includes(normalizedMeasurement);
+};
+
+const addMissingMeasurementsToProductName = (name: string, measurements: string[], maxLength = 82): string => {
+  let output = normalizeProductNameSpaces(name);
+  for (const measurement of measurements) {
+    if (!measurement || productNameHasMeasurement(output, measurement)) continue;
+    const candidate = normalizeProductNameSpaces(`${output} ${measurement}`);
+    // حجم و وزن مهم است؛ اگر کمی طولانی شد فقط اولین واحد را اضافه می‌کنیم تا نام از حالت استاندارد خارج نشود.
+    if (candidate.length <= maxLength || measurements.indexOf(measurement) === 0) {
+      output = candidate;
+    }
+  }
+  return output;
+};
+
+const removeProductNameFillerWords = (name: string): string => normalizeProductNameSpaces(name)
+  .replace(/\b(?:بهترین|فوق\s*العاده|عالی|تضمینی|ویژه|جدید|خاص|محبوب)\b/gi, '')
+  .replace(/\s{2,}/g, ' ')
+  .trim();
+
+const refineGeneratedProductNames = (data: any, productName: string, briefDescription: string): any => {
+  const sourceText = [
+    productName,
+    briefDescription,
+    data.correctedProductName,
+    data.englishProductName,
+    data.fullDescription,
+    data.shortDescription,
+  ].filter(Boolean).join(' ');
+
+  const measurements = extractProductMeasurements(sourceText);
+  data.correctedProductName = addMissingMeasurementsToProductName(
+    removeProductNameFillerWords(toText(data.correctedProductName, productName)),
+    measurements,
+    82
+  );
+  data.englishProductName = addMissingMeasurementsToProductName(
+    removeProductNameFillerWords(toText(data.englishProductName, '')),
+    measurements,
+    95
+  );
+  return data;
+};
+
 const normalizeGeneratedProductData = (value: any, productName: string): any => {
   const data = value && typeof value === 'object' ? value : {};
   const analysis = data.advancedSeoAnalysis && typeof data.advancedSeoAnalysis === 'object'
@@ -856,6 +937,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:
 - نام محصول: "${productName}"
+- قانون نام محصول: نام محصول را کمی کامل‌تر و فروشگاهی بنویس؛ نوع محصول، برند، یک ویژگی مهم و حجم/وزن/تعداد مثل ml، oz، گرم یا عددی را اگر در تصویر/ورودی هست حتماً حفظ کن. نام محصول خیلی بلند، تبلیغاتی یا جمله‌ای نشود.
 - هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.
 - هشدار مهم دسته‌بندی: هایپرمارکت فقط مخصوص خوراکی‌ها و محصولات سوپرمارکتی است. اگر محصول آرایشی، بهداشتی، شامپو، عطر، پوست یا مو بود، به هیچ عنوان هایپرمارکت را داخل متن نیاور.`;
     if (briefDescription) {
@@ -910,7 +992,11 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     } catch (parseError) {
       throw new Error(`AI Gateway returned invalid JSON: ${rawContent.slice(0, 700)}`);
     }
-    const generatedData = normalizeGeneratedProductData(parsedData, productName);
+    const generatedData = refineGeneratedProductNames(
+      normalizeGeneratedProductData(parsedData, productName),
+      productName,
+      briefDescription
+    );
     const selectedCategory = pickInternalCategory(generatedData, productName, briefDescription, isNutsOrDriedFruit);
 
     // اول تمام لینک‌ها و جمله‌های لینک‌سازی مدل حذف می‌شود. مدل حق ندارد خودش هایپرمارکت یا دسته‌بندی بسازد.
