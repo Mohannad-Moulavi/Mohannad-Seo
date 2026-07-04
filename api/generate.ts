@@ -450,6 +450,173 @@ const INTERNAL_CATEGORIES: InternalCategory[] = [
   },
 ];
 
+const ALL_SITE_CATEGORIES: InternalCategory[] = [
+  { title: "آبنبات", url: categoryUrl("product-category/%d8%a2%d8%a8%d9%86%d8%a8%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["آبنبات"] },
+  { title: "آجیل", url: categoryUrl("product-category/nuts/nut/"), group: "food", priority: 45, keywords: ["آجیل", "nut"] },
+  { title: "آجیل ترکیبی", url: categoryUrl("product-category/nuts/nut/mixed-nuts/"), group: "food", priority: 45, keywords: ["آجیل ترکیبی", "mixed nuts"] },
+  { title: "آجیل مناسبتی", url: categoryUrl("product-category/nuts/nut/date-nuts/"), group: "food", priority: 45, keywords: ["آجیل مناسبتی", "date nuts"] },
+  { title: "آدامس", url: categoryUrl("product-category/hypermarket/gum/"), group: "food", priority: 45, keywords: ["آدامس", "gum"] },
+  { title: "آرایش چشم و ابرو", url: categoryUrl("product-category/cosmetics/makeup-cosmetics-2/eye-makeup/"), group: "beauty", priority: 45, keywords: ["آرایش چشم و ابرو", "eye makeup"] },
+  { title: "آرایش چشم و ابرو", url: categoryUrl("product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%da%86%d8%b4%d9%85-%d9%88-%d8%a7%d8%a8%d8%b1%d9%88/"), group: "beauty", priority: 45, keywords: ["آرایش چشم و ابرو"] },
+  { title: "آرایش صورت", url: categoryUrl("product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d8%b5%d9%88%d8%b1%d8%aa/"), group: "beauty", priority: 45, keywords: ["آرایش صورت"] },
+  { title: "آرایش صورت", url: categoryUrl("product-category/cosmetics/makeup-cosmetics-2/face-makeup/"), group: "beauty", priority: 45, keywords: ["آرایش صورت", "face makeup"] },
+  { title: "آرایش لب", url: categoryUrl("product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d9%84%d8%a8/"), group: "beauty", priority: 45, keywords: ["آرایش لب"] },
+  { title: "آرایش لب", url: categoryUrl("product-category/cosmetics/makeup-cosmetics-2/lip-makeup/"), group: "beauty", priority: 45, keywords: ["آرایش لب", "lip makeup"] },
+  { title: "آرایش ناخن", url: categoryUrl("product-category/cosmetics/makeup-cosmetics-2/nail/"), group: "beauty", priority: 45, keywords: ["آرایش ناخن", "nail"] },
+  { title: "آرایش ناخن", url: categoryUrl("product-category/cosmetics/makeup/%d8%a2%d8%b1%d8%a7%db%8c%d8%b4-%d9%86%d8%a7%d8%ae%d9%86/"), group: "beauty", priority: 45, keywords: ["آرایش ناخن"] },
+  { title: "آرایشی", url: categoryUrl("product-category/cosmetics/makeup-cosmetics-2/"), group: "beauty", priority: 45, keywords: ["آرایشی", "makeup cosmetics 2"] },
+  { title: "ابزار آرایش", url: categoryUrl("product-category/cosmetics/makeup-cosmetics-2/makeup-accessories/"), group: "beauty", priority: 45, keywords: ["ابزار آرایش", "makeup accessories"] },
+  { title: "ابزار آرایش", url: categoryUrl("product-category/cosmetics/makeup/%d8%a7%d8%a8%d8%b2%d8%a7%d8%b1-%d8%a2%d8%b1%d8%a7%db%8c%d8%b4/"), group: "beauty", priority: 45, keywords: ["ابزار آرایش"] },
+  { title: "ابزار آرایش و پیرایش", url: categoryUrl("product-category/cosmetics/hair/hair-cutting-tools/"), group: "beauty", priority: 45, keywords: ["ابزار آرایش و پیرایش", "hair cutting tools"] },
+  { title: "ادویه", url: categoryUrl("product-category/nuts/spices/"), group: "food", priority: 45, keywords: ["ادویه", "spices"] },
+  { title: "ارده", url: categoryUrl("product-category/nuts/%d8%a7%d8%b1%d8%af%d9%87/"), group: "food", priority: 45, keywords: ["ارده"] },
+  { title: "اسپری بدن", url: categoryUrl("product-category/cosmetics/perfume/body-spray/"), group: "beauty", priority: 45, keywords: ["اسپری بدن", "body spray"] },
+  { title: "اسکراب مو", url: categoryUrl("product-category/%d8%a7%d8%b3%da%a9%d8%b1%d8%a7%d8%a8-%d9%85%d9%88/"), group: "beauty", priority: 45, keywords: ["اسکراب مو"] },
+  { title: "اسمارتیز", url: categoryUrl("product-category/%d8%a7%d8%b3%d9%85%d8%a7%d8%b1%d8%aa%db%8c%d8%b2/"), group: "food", priority: 45, keywords: ["اسمارتیز"] },
+  { title: "انجیر خشک", url: categoryUrl("product-category/nuts/dried-fruits/fig/"), group: "food", priority: 45, keywords: ["انجیر خشک", "fig"] },
+  { title: "بادام", url: categoryUrl("product-category/nuts/almond/"), group: "food", priority: 45, keywords: ["بادام", "almond"] },
+  { title: "بادام زمینی", url: categoryUrl("product-category/nuts/peanuts/"), group: "food", priority: 45, keywords: ["بادام زمینی", "peanuts"] },
+  { title: "بادام هندی", url: categoryUrl("product-category/nuts/nut/cashew/"), group: "food", priority: 45, keywords: ["بادام هندی", "cashew"] },
+  { title: "بادی اسپلش", url: categoryUrl("product-category/cosmetics/perfume/bod-splash/"), group: "beauty", priority: 45, keywords: ["بادی اسپلش", "bod splash"] },
+  { title: "بدن و حمام", url: categoryUrl("product-category/deodorant-spray/body-bath/"), group: "beauty", priority: 45, keywords: ["بدن و حمام", "body bath"] },
+  { title: "بدن و حمام", url: categoryUrl("product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d8%af%d9%86-%d9%88-%d8%ad%d9%85%d8%a7%d9%85/"), group: "other", priority: 25, keywords: ["بدن و حمام"] },
+  { title: "برگه ها", url: categoryUrl("product-category/nuts/dried-fruits/appricot/"), group: "food", priority: 45, keywords: ["برگه ها", "appricot"] },
+  { title: "برنج", url: categoryUrl("product-category/nuts/%d8%a8%d8%b1%d9%86%d8%ac/"), group: "food", priority: 45, keywords: ["برنج"] },
+  { title: "بهداشت بانوان و آقایان", url: categoryUrl("product-category/deodorant-spray/women-men-care/"), group: "beauty", priority: 45, keywords: ["بهداشت بانوان و آقایان", "women men care"] },
+  { title: "بهداشت بانوان و آقایان", url: categoryUrl("product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d9%87%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d8%a7%d9%86%d9%88%d8%a7%d9%86-%d9%88-%d8%a2%d9%82%d8%a7%db%8c%d8%a7%d9%86/"), group: "beauty", priority: 45, keywords: ["بهداشت بانوان و آقایان"] },
+  { title: "بهداشت دهان و دندان", url: categoryUrl("product-category/cosmetics/personal-care/mouth-teeth/"), group: "beauty", priority: 45, keywords: ["بهداشت دهان و دندان", "mouth teeth"] },
+  { title: "بهداشت شخصی", url: categoryUrl("product-category/cosmetics/personal-care/"), group: "beauty", priority: 45, keywords: ["بهداشت شخصی", "personal care"] },
+  { title: "بیسکوویت", url: categoryUrl("product-category/hypermarket/biscuit/"), group: "food", priority: 45, keywords: ["بیسکوویت", "biscuit", "بیسکویت"] },
+  { title: "پاک کننده و شوینده", url: categoryUrl("product-category/skincare/cleanser/"), group: "beauty", priority: 45, keywords: ["پاک کننده و شوینده", "cleanser"] },
+  { title: "پسته احمد آقایی", url: categoryUrl("product-category/nuts/nut/pistachios/pistachio-ahmad-aghaei/"), group: "food", priority: 45, keywords: ["پسته احمد آقایی", "pistachio ahmad aghaei"] },
+  { title: "پسته اکبری", url: categoryUrl("product-category/nuts/nut/pistachios/pistachio-akbari/"), group: "food", priority: 45, keywords: ["پسته اکبری", "pistachio akbari"] },
+  { title: "پسته بادامی", url: categoryUrl("product-category/nuts/nut/pistachios/pistachio-badami/"), group: "food", priority: 45, keywords: ["پسته بادامی", "pistachio badami"] },
+  { title: "پسته کله قوچی", url: categoryUrl("product-category/nuts/nut/pistachios/pistachio-kalleh-ghouchi/"), group: "food", priority: 45, keywords: ["پسته کله قوچی", "pistachio kalleh ghouchi"] },
+  { title: "پسته ها", url: categoryUrl("product-category/nuts/nut/pistachios/"), group: "food", priority: 45, keywords: ["پسته ها", "pistachios"] },
+  { title: "پنیر", url: categoryUrl("product-category/hypermarket/cheese/"), group: "food", priority: 45, keywords: ["پنیر", "cheese"] },
+  { title: "پنیر", url: categoryUrl("product-category/hypermarket/milk/"), group: "food", priority: 45, keywords: ["پنیر", "milk"] },
+  { title: "پودر ژله", url: categoryUrl("product-category/%d9%be%d9%88%d8%af%d8%b1-%da%98%d9%84%d9%87/"), group: "food", priority: 45, keywords: ["پودر ژله"] },
+  { title: "پودر سوخاری", url: categoryUrl("product-category/hypermarket/breadcrumbs/"), group: "food", priority: 45, keywords: ["پودر سوخاری", "breadcrumbs"] },
+  { title: "پودر شربت", url: categoryUrl("product-category/hypermarket/syrup-powder/"), group: "food", priority: 45, keywords: ["پودر شربت", "syrup powder"] },
+  { title: "پودر شکلات", url: categoryUrl("product-category/hypermarket/%d9%be%d9%88%d8%af%d8%b1-%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["پودر شکلات"] },
+  { title: "تخمه", url: categoryUrl("product-category/nuts/%d8%aa%d8%ae%d9%85%d9%87/"), group: "food", priority: 45, keywords: ["تخمه"] },
+  { title: "تراول ماگ", url: categoryUrl("product-category/%d8%aa%d8%b1%d8%a7%d9%88%d9%84-%d9%85%d8%a7%da%af/"), group: "other", priority: 25, keywords: ["تراول ماگ"] },
+  { title: "تنقلات", url: categoryUrl("product-category/snacks/"), group: "food", priority: 45, keywords: ["تنقلات", "snacks"] },
+  { title: "توت", url: categoryUrl("product-category/nuts/dried-fruits/berry/"), group: "food", priority: 45, keywords: ["توت", "berry"] },
+  { title: "جعبه کادویی زعفران", url: categoryUrl("product-category/saffron/saffron-gift-pack/"), group: "food", priority: 45, keywords: ["جعبه کادویی زعفران", "saffron gift pack"] },
+  { title: "جو", url: categoryUrl("product-category/nuts/%d8%ac%d9%88/"), group: "food", priority: 45, keywords: ["جو"] },
+  { title: "جو و ماجی", url: categoryUrl("product-category/hypermarket/jo-and-maji/"), group: "food", priority: 45, keywords: ["جو و ماجی", "jo and maji"] },
+  { title: "چای", url: categoryUrl("product-category/%da%86%d8%a7%db%8c-2/"), group: "food", priority: 45, keywords: ["چای", "چای 2"] },
+  { title: "چای کرک", url: categoryUrl("product-category/%da%86%d8%a7%db%8c-%da%a9%d8%b1%da%a9/"), group: "food", priority: 45, keywords: ["چای کرک"] },
+  { title: "چیپس", url: categoryUrl("product-category/snacks/chips/"), group: "food", priority: 45, keywords: ["چیپس", "chips"] },
+  { title: "حبه میوه ای", url: categoryUrl("product-category/nuts/dried-fruits/fruit-cubes/"), group: "food", priority: 45, keywords: ["حبه میوه ای", "fruit cubes"] },
+  { title: "حبوبات", url: categoryUrl("product-category/nuts/%d8%ad%d8%a8%d9%88%d8%a8%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["حبوبات"] },
+  { title: "حلوا", url: categoryUrl("product-category/%d8%ad%d9%84%d9%88%d8%a7/"), group: "food", priority: 45, keywords: ["حلوا"] },
+  { title: "خرما", url: categoryUrl("product-category/nuts/dried-fruits/dates/"), group: "food", priority: 45, keywords: ["خرما", "dates"] },
+  { title: "خشکبار", url: categoryUrl("product-category/nuts/dried-fruits/"), group: "food", priority: 45, keywords: ["خشکبار", "dried fruits"] },
+  { title: "خشکبار و آجیل", url: categoryUrl("product-category/nuts/"), group: "food", priority: 30, keywords: ["خشکبار و آجیل", "nuts"] },
+  { title: "خوشبو کننده لباس", url: categoryUrl("product-category/%d8%ae%d9%88%d8%b4%d8%a8%d9%88-%da%a9%d9%86%d9%86%d8%af%d9%87-%d9%84%d8%a8%d8%a7%d8%b3/"), group: "beauty", priority: 45, keywords: ["خوشبو کننده لباس"] },
+  { title: "خوشبو کننده هوا", url: categoryUrl("product-category/cosmetics/perfume/air-freshner/"), group: "beauty", priority: 45, keywords: ["خوشبو کننده هوا", "air freshner"] },
+  { title: "دئودرانت و ضد تعریق", url: categoryUrl("product-category/deodorant-spray/"), group: "beauty", priority: 45, keywords: ["دئودرانت و ضد تعریق", "deodorant spray", "دئودرانت", "دئودورانت", "ضد تعریق", "ضدتعریق", "deodorant", "antiperspirant"] },
+  { title: "دئودرانت و ضد تعریق", url: categoryUrl("product-category/deodorant-spray/women-men-care/deodorant/"), group: "beauty", priority: 45, keywords: ["دئودرانت و ضد تعریق", "deodorant", "دئودرانت", "دئودورانت", "ضد تعریق", "ضدتعریق", "antiperspirant"] },
+  { title: "دئودرانت و ضد تعریق", url: categoryUrl("product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/"), group: "beauty", priority: 45, keywords: ["دئودرانت و ضد تعریق", "دئودرانت", "دئودورانت", "ضد تعریق", "ضدتعریق", "deodorant", "antiperspirant"] },
+  { title: "دسر", url: categoryUrl("product-category/%d8%af%d8%b3%d8%b1/"), group: "food", priority: 45, keywords: ["دسر"] },
+  { title: "دمنوش", url: categoryUrl("product-category/%d8%af%d9%85%d9%86%d9%88%d8%b4/"), group: "food", priority: 45, keywords: ["دمنوش"] },
+  { title: "دیگر محصولات", url: categoryUrl("product-category/uncategorized/"), group: "other", priority: 25, keywords: ["دیگر محصولات", "uncategorized"] },
+  { title: "رمضان", url: categoryUrl("product-category/%d8%b1%d9%85%d8%b6%d8%a7%d9%86/"), group: "other", priority: 25, keywords: ["رمضان"] },
+  { title: "روغن", url: categoryUrl("product-category/hypermarket/oil/"), group: "food", priority: 45, keywords: ["روغن", "oil"] },
+  { title: "روغن زیتون", url: categoryUrl("product-category/hypermarket/olive-oil/"), group: "food", priority: 45, keywords: ["روغن زیتون", "olive oil"] },
+  { title: "زرشک", url: categoryUrl("product-category/nuts/%d8%b2%d8%b1%d8%b4%da%a9/"), group: "food", priority: 45, keywords: ["زرشک"] },
+  { title: "زعفران", url: categoryUrl("product-category/saffron/"), group: "food", priority: 45, keywords: ["زعفران", "saffron"] },
+  { title: "زعفران پنج گرمی", url: categoryUrl("product-category/saffron/5g-saffron/"), group: "food", priority: 45, keywords: ["زعفران پنج گرمی", "5g saffron"] },
+  { title: "زعفران چهار گرمی", url: categoryUrl("product-category/saffron/4g-saffron-saffron/"), group: "food", priority: 45, keywords: ["زعفران چهار گرمی", "4g saffron saffron"] },
+  { title: "زعفران ده گرمی", url: categoryUrl("product-category/saffron/10g-saffron/"), group: "food", priority: 45, keywords: ["زعفران ده گرمی", "10g saffron"] },
+  { title: "زعفران دو گرمی", url: categoryUrl("product-category/saffron/2gr-saffron/"), group: "food", priority: 45, keywords: ["زعفران دو گرمی", "2gr saffron"] },
+  { title: "زعفران دو مثقالی", url: categoryUrl("product-category/saffron/saffron-2-mesghal/"), group: "food", priority: 45, keywords: ["زعفران دو مثقالی", "saffron 2 mesghal"] },
+  { title: "زعفران سه گرمی", url: categoryUrl("product-category/saffron/4g-saffron/"), group: "food", priority: 45, keywords: ["زعفران سه گرمی", "4g saffron"] },
+  { title: "زعفران نیم گرمی", url: categoryUrl("product-category/saffron/%d8%b2%d8%b9%d9%81%d8%b1%d8%a7%d9%86-%d9%86%db%8c%d9%85-%da%af%d8%b1%d9%85%db%8c/"), group: "food", priority: 45, keywords: ["زعفران نیم گرمی"] },
+  { title: "زعفران نیم مثقالی", url: categoryUrl("product-category/saffron/saffron-nim-mesghal/"), group: "food", priority: 45, keywords: ["زعفران نیم مثقالی", "saffron nim mesghal"] },
+  { title: "زعفران یک گرمی", url: categoryUrl("product-category/saffron/1g-saffron/"), group: "food", priority: 45, keywords: ["زعفران یک گرمی", "1g saffron"] },
+  { title: "زعفران یک مثقالی", url: categoryUrl("product-category/saffron/saffron-1-mesghal/"), group: "food", priority: 45, keywords: ["زعفران یک مثقالی", "saffron 1 mesghal"] },
+  { title: "زیبایی پوست", url: categoryUrl("product-category/%d8%b2%db%8c%d8%a8%d8%a7%db%8c%db%8c-%d9%be%d9%88%d8%b3%d8%aa/"), group: "beauty", priority: 45, keywords: ["زیبایی پوست"] },
+  { title: "زیبایی مو", url: categoryUrl("product-category/cosmetics/hair/hair-makeup/"), group: "beauty", priority: 45, keywords: ["زیبایی مو", "hair makeup"] },
+  { title: "زیتون", url: categoryUrl("product-category/%d8%b2%db%8c%d8%aa%d9%88%d9%86/"), group: "food", priority: 45, keywords: ["زیتون"] },
+  { title: "ژله", url: categoryUrl("product-category/%da%98%d9%84%d9%87/"), group: "food", priority: 45, keywords: ["ژله"] },
+  { title: "ژله و کارامل", url: categoryUrl("product-category/hypermarket/jelly-and-caramel/"), group: "food", priority: 45, keywords: ["ژله و کارامل", "jelly and caramel"] },
+  { title: "ساعت مچی", url: categoryUrl("product-category/%d8%b3%d8%a7%d8%b9%d8%aa-%d9%85%da%86%db%8c/"), group: "other", priority: 25, keywords: ["ساعت مچی"] },
+  { title: "سبزیجات", url: categoryUrl("product-category/nuts/dried-herbs/"), group: "food", priority: 45, keywords: ["سبزیجات", "dried herbs"] },
+  { title: "سرلاک", url: categoryUrl("product-category/%d8%b3%d8%b1%d9%84%d8%a7%da%a9/"), group: "beauty", priority: 45, keywords: ["سرلاک"] },
+  { title: "سس", url: categoryUrl("product-category/hypermarket/sauce/"), group: "food", priority: 45, keywords: ["سس", "sauce"] },
+  { title: "سوغاتی", url: categoryUrl("product-category/hypermarket/souvenir/"), group: "food", priority: 45, keywords: ["سوغاتی", "souvenir"] },
+  { title: "سوهان", url: categoryUrl("product-category/%d8%b3%d9%88%d9%87%d8%a7%d9%86/"), group: "food", priority: 45, keywords: ["سوهان"] },
+  { title: "سیروپ", url: categoryUrl("product-category/hypermarket/syrup/"), group: "food", priority: 45, keywords: ["سیروپ", "syrup"] },
+  { title: "شامپو", url: categoryUrl("product-category/cosmetics/hair/shampoo/"), group: "beauty", priority: 45, keywords: ["شامپو", "shampoo"] },
+  { title: "شربت", url: categoryUrl("product-category/%d8%b4%d8%b1%d8%a8%d8%aa/"), group: "food", priority: 45, keywords: ["شربت"] },
+  { title: "شکلات", url: categoryUrl("product-category/%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["شکلات"] },
+  { title: "شکلات", url: categoryUrl("product-category/hypermarket/chocolate/"), group: "food", priority: 45, keywords: ["شکلات", "chocolate"] },
+  { title: "شلات", url: categoryUrl("product-category/%d8%b4%d9%84%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["شلات"] },
+  { title: "شوینده", url: categoryUrl("product-category/hypermarket/detergent/"), group: "other", priority: 25, keywords: ["شوینده", "detergent"] },
+  { title: "شیر خشک", url: categoryUrl("product-category/%d8%b4%db%8c%d8%b1-%d8%ae%d8%b4%da%a9/"), group: "food", priority: 45, keywords: ["شیر خشک"] },
+  { title: "شیرینی", url: categoryUrl("product-category/sweets/"), group: "food", priority: 45, keywords: ["شیرینی", "sweets"] },
+  { title: "ضد آفتاب", url: categoryUrl("product-category/skincare/sunscreen/"), group: "beauty", priority: 45, keywords: ["ضد آفتاب", "sunscreen"] },
+  { title: "ضدجوش", url: categoryUrl("product-category/%d8%b6%d8%af%d8%ac%d9%88%d8%b4/"), group: "beauty", priority: 45, keywords: ["ضدجوش"] },
+  { title: "عرقیجات", url: categoryUrl("product-category/%d8%b9%d8%b1%d9%82%db%8c%d8%ac%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["عرقیجات"] },
+  { title: "عطر جیبی", url: categoryUrl("product-category/cosmetics/perfume/pocket-perfume/"), group: "beauty", priority: 45, keywords: ["عطر جیبی", "pocket perfume"] },
+  { title: "عطر و ادکلن", url: categoryUrl("product-category/cosmetics/perfume/fragrance/"), group: "beauty", priority: 45, keywords: ["عطر و ادکلن", "fragrance"] },
+  { title: "عطر و اسپری", url: categoryUrl("product-category/cosmetics/perfume/"), group: "beauty", priority: 45, keywords: ["عطر و اسپری", "perfume"] },
+  { title: "غلات صبحانه", url: categoryUrl("product-category/hypermarket/cornflakes/"), group: "food", priority: 45, keywords: ["غلات صبحانه", "cornflakes"] },
+  { title: "فندق", url: categoryUrl("product-category/nuts/%d9%81%d9%86%d8%af%d9%82/"), group: "food", priority: 45, keywords: ["فندق"] },
+  { title: "قالب موج", url: categoryUrl("product-category/%d9%82%d8%a7%d9%84%d8%a8-%d9%85%d9%88%d8%ac/"), group: "beauty", priority: 45, keywords: ["قالب موج"] },
+  { title: "قرص قهوه", url: categoryUrl("product-category/%d9%82%d8%b1%d8%b5-%d9%82%d9%87%d9%88%d9%87/"), group: "food", priority: 45, keywords: ["قرص قهوه"] },
+  { title: "قنادی", url: categoryUrl("product-category/%d9%82%d9%86%d8%a7%d8%af%db%8c/"), group: "food", priority: 45, keywords: ["قنادی"] },
+  { title: "قند", url: categoryUrl("product-category/nuts/%d9%82%d9%86%d8%af/"), group: "food", priority: 45, keywords: ["قند"] },
+  { title: "قهوه", url: categoryUrl("product-category/coffee/"), group: "food", priority: 45, keywords: ["قهوه", "coffee"] },
+  { title: "قهوه فوری", url: categoryUrl("product-category/hypermarket/instant-coffee/"), group: "food", priority: 45, keywords: ["قهوه فوری", "instant coffee"] },
+  { title: "کادویی", url: categoryUrl("product-category/%da%a9%d8%a7%d8%af%d9%88%db%8c%db%8c/"), group: "other", priority: 25, keywords: ["کادویی"] },
+  { title: "کافی شاپ", url: categoryUrl("product-category/cafe/"), group: "food", priority: 45, keywords: ["کافی شاپ", "cafe"] },
+  { title: "کرم خوراکی", url: categoryUrl("product-category/hypermarket/edible-cream/"), group: "food", priority: 45, keywords: ["کرم خوراکی", "edible cream"] },
+  { title: "کرم دست", url: categoryUrl("product-category/%da%a9%d8%b1%d9%85-%d8%af%d8%b3%d8%aa/"), group: "beauty", priority: 45, keywords: ["کرم دست"] },
+  { title: "کرم کارامل", url: categoryUrl("product-category/%da%a9%d8%b1%d9%85-%da%a9%d8%a7%d8%b1%d8%a7%d9%85%d9%84/"), group: "food", priority: 45, keywords: ["کرم کارامل"] },
+  { title: "کشک", url: categoryUrl("product-category/nuts/%da%a9%d8%b4%da%a9/"), group: "food", priority: 45, keywords: ["کشک"] },
+  { title: "کشمش", url: categoryUrl("product-category/nuts/dried-fruits/%da%a9%d8%b4%d9%85%d8%b4/"), group: "food", priority: 45, keywords: ["کشمش"] },
+  { title: "کمپوت", url: categoryUrl("product-category/hypermarket/compote/"), group: "food", priority: 45, keywords: ["کمپوت", "compote"] },
+  { title: "کمربند حرارتی", url: categoryUrl("product-category/%da%a9%d9%85%d8%b1%d8%a8%d9%86%d8%af-%d8%ad%d8%b1%d8%a7%d8%b1%d8%aa%db%8c/"), group: "other", priority: 25, keywords: ["کمربند حرارتی"] },
+  { title: "کنجد", url: categoryUrl("product-category/nuts/%da%a9%d9%86%d8%ac%d8%af/"), group: "food", priority: 45, keywords: ["کنجد"] },
+  { title: "گردو", url: categoryUrl("product-category/nuts/%da%af%d8%b1%d8%af%d9%88/"), group: "food", priority: 45, keywords: ["گردو"] },
+  { title: "گز", url: categoryUrl("product-category/%da%af%d8%b2/"), group: "food", priority: 45, keywords: ["گز"] },
+  { title: "لوازم آرایشی بهداشتی", url: categoryUrl("product-category/cosmetics/"), group: "beauty", priority: 30, keywords: ["لوازم آرایشی بهداشتی", "cosmetics"] },
+  { title: "لوازم اصلاح", url: categoryUrl("product-category/cosmetics/personal-care/shaving-supplies/"), group: "beauty", priority: 45, keywords: ["لوازم اصلاح", "shaving supplies"] },
+  { title: "لوازم قنادی", url: categoryUrl("product-category/confectionery/"), group: "food", priority: 45, keywords: ["لوازم قنادی", "confectionery"] },
+  { title: "لوسیون", url: categoryUrl("product-category/%d9%84%d9%88%d8%b3%db%8c%d9%88%d9%86/"), group: "beauty", priority: 45, keywords: ["لوسیون"] },
+  { title: "لوسیون بدن", url: categoryUrl("product-category/%d9%84%d9%88%d8%b3%db%8c%d9%88%d9%86-%d8%a8%d8%af%d9%86/"), group: "beauty", priority: 45, keywords: ["لوسیون بدن"] },
+  { title: "محصولات کادوئی", url: categoryUrl("product-category/gifts/"), group: "other", priority: 25, keywords: ["محصولات کادوئی", "gifts"] },
+  { title: "مراقبت از مو", url: categoryUrl("product-category/cosmetics/hair/hair-care/"), group: "beauty", priority: 45, keywords: ["مراقبت از مو", "hair care"] },
+  { title: "مراقبت بدن", url: categoryUrl("product-category/skincare/body-care/"), group: "beauty", priority: 45, keywords: ["مراقبت بدن", "body care"] },
+  { title: "مراقبت پا", url: categoryUrl("product-category/skincare/feet-care/"), group: "beauty", priority: 45, keywords: ["مراقبت پا", "feet care"] },
+  { title: "مراقبت پوست", url: categoryUrl("product-category/skincare/"), group: "beauty", priority: 30, keywords: ["مراقبت پوست", "skincare"] },
+  { title: "مراقبت چشم و ابرو", url: categoryUrl("product-category/skincare/eye-care/"), group: "beauty", priority: 45, keywords: ["مراقبت چشم و ابرو", "eye care"] },
+  { title: "مراقبت دست و ناخن", url: categoryUrl("product-category/skincare/hand-nail-treat/"), group: "beauty", priority: 45, keywords: ["مراقبت دست و ناخن", "hand nail treat"] },
+  { title: "مراقبت صورت", url: categoryUrl("product-category/skincare/face-care/"), group: "beauty", priority: 45, keywords: ["مراقبت صورت", "face care"] },
+  { title: "مراقبت لب", url: categoryUrl("product-category/skincare/lip-care/"), group: "beauty", priority: 45, keywords: ["مراقبت لب", "lip care"] },
+  { title: "مراقبت و زیبایی مو", url: categoryUrl("product-category/cosmetics/hair/"), group: "beauty", priority: 30, keywords: ["مراقبت و زیبایی مو", "hair"] },
+  { title: "مغز پسته خام", url: categoryUrl("product-category/nuts/nut/pistachios/raw-pistachio/"), group: "food", priority: 45, keywords: ["مغز پسته خام", "raw pistachio"] },
+  { title: "مواد شوینده", url: categoryUrl("product-category/hypermarket/%d9%85%d9%88%d8%a7%d8%af-%d8%b4%d9%88%db%8c%d9%86%d8%af%d9%87/"), group: "beauty", priority: 45, keywords: ["مواد شوینده"] },
+  { title: "میوه", url: categoryUrl("product-category/%d9%85%db%8c%d9%88%d9%87/"), group: "food", priority: 45, keywords: ["میوه"] },
+  { title: "میوه خشک", url: categoryUrl("product-category/nuts/%d9%85%db%8c%d9%88%d9%87-%d8%ae%d8%b4%da%a9/"), group: "food", priority: 45, keywords: ["میوه خشک"] },
+  { title: "نبات", url: categoryUrl("product-category/nuts/%d9%86%d8%a8%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["نبات"] },
+  { title: "نخود", url: categoryUrl("product-category/nuts/%d9%86%d8%ae%d9%88%d8%af/"), group: "food", priority: 45, keywords: ["نخود"] },
+  { title: "نسکافه", url: categoryUrl("product-category/%d9%86%d8%b3%da%a9%d8%a7%d9%81%d9%87/"), group: "food", priority: 45, keywords: ["نسکافه"] },
+  { title: "نودل", url: categoryUrl("product-category/%d9%86%d9%88%d8%af%d9%84/"), group: "food", priority: 45, keywords: ["نودل"] },
+  { title: "نودل", url: categoryUrl("product-category/hypermarket/noodles/"), group: "food", priority: 45, keywords: ["نودل", "noodles"] },
+  { title: "نوشیدنی", url: categoryUrl("product-category/hypermarket/drink/"), group: "food", priority: 45, keywords: ["نوشیدنی", "drink"] },
+  { title: "هات چاکلت", url: categoryUrl("product-category/%d9%87%d8%a7%d8%aa-%da%86%d8%a7%da%a9%d9%84%d8%aa/"), group: "food", priority: 45, keywords: ["هات چاکلت"] },
+  { title: "هایپرمارکت", url: categoryUrl("product-category/hypermarket/"), group: "food", priority: 30, keywords: ["هایپرمارکت", "hypermarket"] },
+  { title: "هل", url: categoryUrl("product-category/nuts/%d9%87%d9%84/"), group: "food", priority: 45, keywords: ["هل"] },
+  { title: "وانیل", url: categoryUrl("product-category/%d9%88%d8%a7%d9%86%db%8c%d9%84/"), group: "food", priority: 45, keywords: ["وانیل"] },
+  { title: "وسایل برقی", url: categoryUrl("product-category/%d9%88%d8%b3%d8%a7%db%8c%d9%84-%d8%a8%d8%b1%d9%82%db%8c/"), group: "other", priority: 25, keywords: ["وسایل برقی"] },
+  { title: "ویفر شکلات", url: categoryUrl("product-category/hypermarket/%d9%88%db%8c%d9%81%d8%b1-%d8%b4%da%a9%d9%84%d8%a7%d8%aa/"), group: "food", priority: 45, keywords: ["ویفر شکلات"] }
+];
+
 const HYPERMARKET_FALLBACK_CATEGORY: InternalCategory = {
   title: 'هایپرمارکت',
   url: categoryUrl('product-category/hypermarket/'),
@@ -460,9 +627,16 @@ const HYPERMARKET_FALLBACK_CATEGORY: InternalCategory = {
 
 const BEAUTY_FALLBACK_CATEGORY_TITLE = 'لوازم آرایشی بهداشتی';
 
+const CATEGORY_POOL: InternalCategory[] = [...INTERNAL_CATEGORIES, ...ALL_SITE_CATEGORIES];
+
 const getCategory = (title: string): InternalCategory => {
   if (title === HYPERMARKET_FALLBACK_CATEGORY.title) return HYPERMARKET_FALLBACK_CATEGORY;
-  return INTERNAL_CATEGORIES.find(item => item.title === title)!;
+  const exact = CATEGORY_POOL.find(item => item.title === title);
+  if (exact) return exact;
+  const normalizedTitle = normalizeText(title);
+  const normalized = CATEGORY_POOL.find(item => normalizeText(item.title) === normalizedTitle);
+  if (normalized) return normalized;
+  return getCategory(BEAUTY_FALLBACK_CATEGORY_TITLE);
 };
 
 const normalizeText = (value: unknown): string => String(value || '')
@@ -499,6 +673,45 @@ const countKeywordMatches = (text: string, keywords: string[]): number => {
   }, 0);
 };
 
+const pickExplicitCategoryFromUserText = (rawText: string): InternalCategory | null => {
+  const originalText = String(rawText || '');
+  if (!originalText.trim()) return null;
+
+  // اگر کاربر لینک مستقیم دسته‌بندی را در توضیحات مختصر داد، همان لینک اولویت قطعی دارد.
+  const urlMatches = originalText.match(/https?:\/\/[^\s<>'"]*noon-valqalam\.ir[^\s<>'"]*/gi) || [];
+  for (const rawUrl of urlMatches) {
+    const cleanUrl = normalizeUrl(rawUrl);
+    const byUrl = CATEGORY_POOL.find(category => normalizeUrl(category.url) === cleanUrl);
+    if (byUrl) return byUrl;
+  }
+
+  // فقط وقتی کاربر صریحاً گفته باشد «دسته/دسته‌بندی/category ...» از نام دسته‌ها استفاده کن.
+  // این باعث می‌شود کلماتی مثل روغن نارگیل یا شیر باتر اشتباهی به دسته خوراکی نروند.
+  const text = normalizeText(originalText);
+  const markerWords = ['دسته', 'دسته بندی', 'دسته بندی', 'category', 'کتگوری', 'لینک دسته'];
+  const actionWords = ['بزن', 'بذار', 'بزار', 'قرار بده', 'ببر', 'انتخاب کن', 'استفاده کن'];
+  const sortedCategories = [...CATEGORY_POOL]
+    .filter(category => normalizeText(category.title).length >= 2)
+    .sort((a, b) => normalizeText(b.title).length - normalizeText(a.title).length);
+
+  for (const category of sortedCategories) {
+    const categoryTitle = normalizeText(category.title);
+    let index = text.indexOf(categoryTitle);
+    while (index !== -1) {
+      const before = text.slice(Math.max(0, index - 70), index);
+      const after = text.slice(index + categoryTitle.length, index + categoryTitle.length + 50);
+      const hasMarkerBefore = markerWords.some(marker => before.includes(normalizeText(marker)));
+      const hasActionAfter = actionWords.some(action => after.includes(normalizeText(action)));
+      if (hasMarkerBefore || hasActionAfter) {
+        return category;
+      }
+      index = text.indexOf(categoryTitle, index + categoryTitle.length);
+    }
+  }
+
+  return null;
+};
+
 const hasBeautySignal = (text: string): boolean => {
   const beautySignals = [
     'شامپو', 'شامپو مو', 'شامپو بدن', 'ضد شوره', 'ماسک مو', 'سرم مو', 'نرم کننده مو', 'نرم‌کننده مو',
@@ -529,6 +742,12 @@ const hasFoodSignal = (text: string): boolean => {
 };
 
 const pickInternalCategory = (data: any, productName: string, briefDescription: string, isNutsOrDriedFruit: boolean): InternalCategory | null => {
+  const explicitCategory = pickExplicitCategoryFromUserText(`${productName}
+${briefDescription}`);
+  if (explicitCategory) {
+    return explicitCategory;
+  }
+
   if (isNutsOrDriedFruit) {
     return getCategory('خشکبار و آجیل');
   }
@@ -567,7 +786,7 @@ const pickInternalCategory = (data: any, productName: string, briefDescription: 
   let bestCategory: InternalCategory | null = null;
   let bestScore = 0;
 
-  for (const category of INTERNAL_CATEGORIES) {
+  for (const category of CATEGORY_POOL) {
     const userScore = countKeywordMatches(userText, category.keywords) * 10;
     const modelScore = countKeywordMatches(modelText, category.keywords) * 3;
     const totalScore = userScore + modelScore + (userScore || modelScore ? category.priority / 100 : 0);
