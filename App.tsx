@@ -1,6 +1,6 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import type { ProductData, ImageFile } from './types';
-import { generateProductContent } from './services/aiService';
+import { generateProductContent } from './services/geminiService';
 import Loader from './components/Loader';
 
 // --- Helper Components (Defined outside App to prevent re-creation on re-renders) ---
@@ -24,73 +24,48 @@ const CheckIcon: React.FC = () => (
 );
 
 
-
-const compressImageFile = (file: File): Promise<ImageFile> => {
-  return new Promise((resolve, reject) => {
-    const reader = new FileReader();
-    reader.onerror = () => reject(new Error('امکان خواندن تصویر وجود ندارد.'));
-    reader.onload = () => {
-      const img = new Image();
-      img.onerror = () => reject(new Error('فرمت تصویر پشتیبانی نشد.'));
-      img.onload = () => {
-        const maxSide = 1280;
-        const scale = Math.min(1, maxSide / Math.max(img.width, img.height));
-        const width = Math.max(1, Math.round(img.width * scale));
-        const height = Math.max(1, Math.round(img.height * scale));
-
-        const canvas = document.createElement('canvas');
-        canvas.width = width;
-        canvas.height = height;
-        const ctx = canvas.getContext('2d');
-        if (!ctx) {
-          reject(new Error('مرورگر امکان پردازش تصویر را ندارد.'));
-          return;
-        }
-        ctx.drawImage(img, 0, 0, width, height);
-
-        const dataUrl = canvas.toDataURL('image/jpeg', 0.82);
-        const base64 = dataUrl.split(',')[1];
-        if (!base64) {
-          reject(new Error('فشرده‌سازی تصویر ناموفق بود.'));
-          return;
-        }
-        resolve({
-          base64,
-          mimeType: 'image/jpeg',
-          name: file.name.replace(/\.[^.]+$/, '') + '.jpg',
-        });
-      };
-      img.src = String(reader.result || '');
-    };
-    reader.readAsDataURL(file);
-  });
-};
-
 interface ImageUploaderProps {
   image: ImageFile | null;
   setImage: (image: ImageFile | null) => void;
 }
 
 const ImageUploader: React.FC<ImageUploaderProps> = ({ image, setImage }) => {
-  const processFile = async (file: File | undefined) => {
-    if (!file || !file.type.startsWith('image/')) return;
-    try {
-      const optimizedImage = await compressImageFile(file);
-      setImage(optimizedImage);
-    } catch (error) {
-      console.error('Image optimization failed:', error);
-      alert(error instanceof Error ? error.message : 'خطا در پردازش تصویر');
-    }
-  };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    void processFile(event.target.files?.[0]);
+    const file = event.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64String = reader.result?.toString().split(',')[1];
+        if (base64String) {
+          setImage({
+            base64: base64String,
+            mimeType: file.type,
+            name: file.name
+          });
+        }
+      };
+      reader.readAsDataURL(file);
+    }
   };
 
   const handleDrop = (event: React.DragEvent<HTMLLabelElement>) => {
     event.preventDefault();
     event.stopPropagation();
-    void processFile(event.dataTransfer.files?.[0]);
+    const file = event.dataTransfer.files?.[0];
+     if (file && file.type.startsWith('image/')) {
+       const reader = new FileReader();
+       reader.onloadend = () => {
+         const base64String = reader.result?.toString().split(',')[1];
+         if (base64String) {
+           setImage({
+             base64: base64String,
+             mimeType: file.type,
+             name: file.name
+           });
+         }
+       };
+       reader.readAsDataURL(file);
+     }
   };
 
   const handleDragOver = (event: React.DragEvent<HTMLLabelElement>) => {
@@ -123,13 +98,78 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({ image, setImage }) => {
           <div className="text-center">
             <UploadIcon />
             <p className="mt-2 text-sm text-gray-400">تصویر را بکشید و رها کنید یا کلیک کنید</p>
-            <p className="text-xs text-gray-500">PNG, JPG, WEBP - تصویر قبل از ارسال سبک می‌شود</p>
+            <p className="text-xs text-gray-500">PNG, JPG, WEBP</p>
           </div>
         )}
         <input id="file-upload" name="file-upload" type="file" className="sr-only" accept="image/png, image/jpeg, image/webp" onChange={handleFileChange} />
       </label>
     </div>
   );
+};
+
+
+const sanitizeHtmlForPreview = (html: string): string => {
+    if (typeof html !== 'string') return '';
+
+    const fallbackSanitize = (value: string) => value
+        .replace(/<\/?(?:html|head|body|meta|link|base|title)[^>]*>/gi, '')
+        .replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '')
+        .replace(/<style\b[^>]*>[\s\S]*?<\/style>/gi, '')
+        .replace(/<iframe\b[^>]*>[\s\S]*?<\/iframe>/gi, '')
+        .replace(/<object\b[^>]*>[\s\S]*?<\/object>/gi, '')
+        .replace(/<embed\b[^>]*>/gi, '')
+        .replace(/\s+on\w+\s*=\s*("[^"]*"|'[^']*'|[^\s>]+)/gi, '')
+        .replace(/\s+style\s*=\s*("[^"]*"|'[^']*')/gi, '')
+        .replace(/href\s*=\s*("|')\s*javascript:[\s\S]*?\1/gi, 'href="#"');
+
+    try {
+        if (typeof document === 'undefined') return fallbackSanitize(html);
+
+        const allowedTags = new Set(['P', 'STRONG', 'B', 'EM', 'I', 'UL', 'OL', 'LI', 'H4', 'H5', 'HR', 'A', 'BR', 'SPAN']);
+        const template = document.createElement('template');
+        template.innerHTML = fallbackSanitize(html);
+
+        const cleanNode = (node: Node) => {
+            const children = Array.from(node.childNodes);
+            for (const child of children) {
+                if (child.nodeType === Node.ELEMENT_NODE) {
+                    const element = child as HTMLElement;
+                    const tagName = element.tagName.toUpperCase();
+
+                    if (!allowedTags.has(tagName)) {
+                        const fragment = document.createDocumentFragment();
+                        while (element.firstChild) fragment.appendChild(element.firstChild);
+                        element.replaceWith(fragment);
+                        cleanNode(node);
+                        continue;
+                    }
+
+                    for (const attr of Array.from(element.attributes)) {
+                        const attrName = attr.name.toLowerCase();
+                        const attrValue = attr.value || '';
+                        const isSafeHref = tagName === 'A' && attrName === 'href' && /^https:\/\/noon-valqalam\.ir\//i.test(attrValue);
+
+                        if (isSafeHref) {
+                            element.setAttribute('href', attrValue.replace(/([^:])\/{2,}/g, '$1/'));
+                            element.setAttribute('target', '_blank');
+                            element.setAttribute('rel', 'noopener noreferrer');
+                            continue;
+                        }
+
+                        element.removeAttribute(attr.name);
+                    }
+
+                    cleanNode(element);
+                }
+            }
+        };
+
+        cleanNode(template.content);
+        return template.innerHTML;
+    } catch (error) {
+        console.error('Preview sanitizer failed:', error);
+        return fallbackSanitize(html);
+    }
 };
 
 interface OutputSectionProps {
@@ -168,7 +208,7 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
             </div>
             <div className="text-gray-300 whitespace-pre-wrap font-sans">
                 {isHtml && typeof content === 'string' ? (
-                    <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />
+                    <div className="prose prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sanitizeHtmlForPreview(content) }} />
                 ) : (
                    content
                 )}
@@ -177,7 +217,6 @@ const OutputSection: React.FC<OutputSectionProps> = ({ label, content, isHtml = 
         </div>
     );
 };
-
 
 const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ title, items }) => (
     <div>
@@ -193,30 +232,163 @@ const AdvancedAnalysisItem: React.FC<{title: string, items: string[]}> = ({ titl
 );
 
 
-const AdvancedSeoTabs: React.FC<{ analysis: ProductData['advancedSeoAnalysis'] }> = ({ analysis }) => {
-    const uniqueItems = (items: string[]) => Array.from(new Set((items || []).filter(Boolean).map(item => item.trim()).filter(Boolean)));
+const normalizeAdvancedSeoAnalysis = (analysis?: Partial<ProductData['advancedSeoAnalysis']> | null): ProductData['advancedSeoAnalysis'] => ({
+    keyphraseSynonyms: Array.isArray(analysis?.keyphraseSynonyms) ? analysis!.keyphraseSynonyms.filter(Boolean) : [],
+    lsiKeywords: Array.isArray(analysis?.lsiKeywords) ? analysis!.lsiKeywords.filter(Boolean) : [],
+    longTailKeywords: Array.isArray(analysis?.longTailKeywords) ? analysis!.longTailKeywords.filter(Boolean) : [],
+    semanticEntities: Array.isArray(analysis?.semanticEntities) ? analysis!.semanticEntities.filter(Boolean) : [],
+    searchIntent: typeof analysis?.searchIntent === 'string' ? analysis.searchIntent : '',
+    internalLinkingSuggestions: Array.isArray(analysis?.internalLinkingSuggestions) ? analysis!.internalLinkingSuggestions.filter(Boolean) : [],
+});
 
-    const relatedKeywords = uniqueItems([
-        ...(analysis.keyphraseSynonyms || []),
-        ...(analysis.lsiKeywords || []),
-        ...(analysis.longTailKeywords || []),
-        ...(analysis.semanticEntities || []),
-    ]);
+const AdvancedSeoTabs: React.FC<{ analysis?: Partial<ProductData['advancedSeoAnalysis']> | null }> = ({ analysis }) => {
+    const safeAnalysis = normalizeAdvancedSeoAnalysis(analysis);
+    const [activeTab, setActiveTab] = useState('keywords');
+
+    const tabs = {
+        keywords: 'کلیدواژه‌ها',
+        intent: 'هدف جستجو',
+        linking: 'لینک‌سازی داخلی',
+    };
+
+    const renderContent = () => {
+        switch (activeTab) {
+            case 'keywords': {
+                const allKeywords = [
+                    ...(safeAnalysis.keyphraseSynonyms || []),
+                    ...(safeAnalysis.lsiKeywords || []),
+                    ...(safeAnalysis.longTailKeywords || []),
+                    ...(safeAnalysis.semanticEntities || []),
+                ].filter(Boolean);
+
+                return (
+                     <div>
+                        <h4 className="font-semibold text-gray-400 mb-2">کلیدواژه های مرتبط</h4>
+                        {allKeywords.length > 0 ? (
+                            <p className="text-gray-200 bg-gray-700/50 p-3 rounded-md leading-relaxed">
+                                {allKeywords.join('، ')}
+                            </p>
+                        ) : (
+                            <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
+                        )}
+                    </div>
+                );
+            }
+            case 'intent':
+                return (
+                    <div>
+                        <h4 className="font-semibold text-gray-400">Search Intent (هدف جستجو)</h4>
+                        <p className="text-gray-200 bg-gray-700/50 px-2 py-1 rounded inline-block mt-1">{safeAnalysis.searchIntent || 'نامشخص'}</p>
+                    </div>
+                );
+            case 'linking':
+                return <AdvancedAnalysisItem title="Internal Linking Suggestions (پیشنهاد لینک داخلی)" items={safeAnalysis.internalLinkingSuggestions} />;
+            default:
+                return null;
+        }
+    };
 
     return (
         <div>
-            <h4 className="font-semibold text-gray-400 mb-2">کلیدواژه‌های مرتبط، مترادف و LSI / معنایی</h4>
-            {relatedKeywords.length > 0 ? (
-                <p className="text-gray-200 bg-gray-700/50 p-3 rounded-md leading-relaxed whitespace-pre-wrap">
-                    {relatedKeywords.join('، ')}
-                </p>
-            ) : (
-                <p className="text-gray-500 text-xs italic">موردی یافت نشد.</p>
-            )}
+            <div className="flex border-b border-gray-700 mb-3">
+                {Object.entries(tabs).map(([key, title]) => (
+                    <button
+                        key={key}
+                        onClick={() => setActiveTab(key)}
+                        className={`-mb-px px-4 py-2 text-sm font-medium transition-colors focus:outline-none ${
+                            activeTab === key
+                                ? 'border-b-2 border-blue-400 text-white'
+                                : 'border-b-2 border-transparent text-gray-400 hover:text-white hover:border-gray-500'
+                        }`}
+                        aria-pressed={activeTab === key}
+                    >
+                        {title}
+                    </button>
+                ))}
+            </div>
+            {/* The key attribute forces React to re-mount the component, triggering the animation */}
+            <div key={activeTab} className="pt-2 text-sm animate-fade-in-fast">
+                {renderContent()}
+            </div>
         </div>
     );
 };
 
+
+class AppErrorBoundary extends React.Component<{ children: React.ReactNode }, { hasError: boolean; message: string }> {
+  constructor(props: { children: React.ReactNode }) {
+    super(props);
+    this.state = { hasError: false, message: '' };
+  }
+
+  static getDerivedStateFromError(error: Error) {
+    return { hasError: true, message: error?.message || 'خطای نمایش خروجی' };
+  }
+
+  componentDidCatch(error: Error) {
+    console.error('UI render error:', error);
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return (
+        <div className="min-h-screen bg-gray-900 text-white p-4 sm:p-8 flex items-center justify-center">
+          <div className="max-w-xl bg-gray-800/70 border border-red-500/40 rounded-xl p-6 text-center">
+            <h1 className="text-2xl font-bold text-red-300 mb-3">خطا در نمایش خروجی</h1>
+            <p className="text-gray-300 mb-4">خروجی ناقص یا غیرمنتظره برگشته بود، ولی صفحه دیگر خالی نمی‌شود. یک بار دوباره تولید محتوا را بزنید.</p>
+            <p className="text-xs text-gray-500 break-words">{this.state.message}</p>
+            <button
+              onClick={() => this.setState({ hasError: false, message: '' })}
+              className="mt-5 bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition-colors"
+            >
+              برگشت به برنامه
+            </button>
+          </div>
+        </div>
+      );
+    }
+
+    return this.props.children;
+  }
+}
+
+
+
+const RuntimeErrorBanner: React.FC = () => {
+  const [runtimeError, setRuntimeError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      setRuntimeError(event.message || 'خطای اجرای صفحه');
+    };
+    const handleRejection = (event: PromiseRejectionEvent) => {
+      const reason = event.reason instanceof Error ? event.reason.message : String(event.reason || 'خطای ارتباط یا پردازش');
+      setRuntimeError(reason);
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleRejection);
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleRejection);
+    };
+  }, []);
+
+  if (!runtimeError) return null;
+
+  return (
+    <div className="fixed bottom-4 left-4 right-4 sm:right-auto sm:max-w-lg z-50 bg-red-950/95 border border-red-500/70 text-white rounded-xl shadow-2xl p-4">
+      <div className="flex items-start justify-between gap-4">
+        <div>
+          <p className="font-bold text-red-200 mb-1">خطای موقت در نمایش یا ارتباط</p>
+          <p className="text-sm text-red-100 break-words">{runtimeError}</p>
+          <p className="text-xs text-red-200/70 mt-2">صفحه نباید خالی شود؛ دوباره دکمه تولید را بزنید یا اگر تکرار شد متن خطا را بفرستید.</p>
+        </div>
+        <button onClick={() => setRuntimeError(null)} className="text-red-100 hover:text-white text-xl leading-none">×</button>
+      </div>
+    </div>
+  );
+};
 
 // --- Main App Component ---
 
@@ -258,7 +430,7 @@ function App() {
       <div className="max-w-7xl mx-auto">
         <header className="text-center mb-10">
           <h1 className="text-4xl sm:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-teal-300">
-            Mohannad 4o
+            Mohannad SEO
           </h1>
           <p className="mt-4 text-lg text-gray-400">
            دستیار هوشمند شما برای تولید و بهینه‌سازی محتوای محصول در وردپرس
@@ -368,15 +540,17 @@ function App() {
                     <OutputSection label="متن جایگزین تصویر (Alt Text)" content={generatedContent.altImageText} copyText={generatedContent.altImageText} />
                     {/* 9. Advanced SEO Analysis */}
                     <OutputSection 
-                        label="کلیدواژه‌های مرتبط، مترادف و LSI"
+                        label="Advanced SEO Analysis (تجزیه و تحلیل سئو برتر)"
                         content={<AdvancedSeoTabs analysis={generatedContent.advancedSeoAnalysis} />}
                         copyText={
-                           [
-                                ...(generatedContent.advancedSeoAnalysis.keyphraseSynonyms || []),
-                                ...(generatedContent.advancedSeoAnalysis.lsiKeywords || []),
-                                ...(generatedContent.advancedSeoAnalysis.longTailKeywords || []),
-                                ...(generatedContent.advancedSeoAnalysis.semanticEntities || []),
-                            ].filter(Boolean).join('، ')
+                           `Keywords: ${[
+                                ...(generatedContent.advancedSeoAnalysis?.keyphraseSynonyms || []),
+                                ...(generatedContent.advancedSeoAnalysis?.lsiKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis?.longTailKeywords || []),
+                                ...(generatedContent.advancedSeoAnalysis?.semanticEntities || []),
+                            ].filter(Boolean).join(', ')}\n` +
+                            `Search Intent: ${generatedContent.advancedSeoAnalysis?.searchIntent || ''}\n` +
+                            `Internal Linking Suggestions: ${(generatedContent.advancedSeoAnalysis?.internalLinkingSuggestions || []).join(', ')}`
                         }
                     />
                 </div>
@@ -388,6 +562,7 @@ function App() {
             <p>ساخته شده با 🧠 و ❤️ توسط Mohannad</p>
         </footer>
       </div>
+      <RuntimeErrorBanner />
        <style>{`
           .custom-scrollbar::-webkit-scrollbar {
             width: 8px;
@@ -433,10 +608,6 @@ function App() {
             margin-top: 1.5rem;
             margin-bottom: 1.5rem;
            }
-           .direction-ltr {
-            direction: ltr;
-            text-align: left;
-           }
           @keyframes fade-in {
             from { opacity: 0; transform: translateY(-10px); }
             to { opacity: 1; transform: translateY(0); }
@@ -456,4 +627,10 @@ function App() {
   );
 }
 
-export default App;
+export default function RootApp() {
+  return (
+    <AppErrorBoundary>
+      <App />
+    </AppErrorBoundary>
+  );
+}

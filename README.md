@@ -1,20 +1,20 @@
-# Mohannad 4o - HYPERMARKET FOOD ONLY DEEP LOCK VERIFIED
+<div align="center">
+<img width="1200" height="475" alt="GHBanner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
+</div>
 
-این نسخه عمیقاً قانون هایپرمارکت را اعمال می‌کند.
+# Run and deploy your AI Studio app
 
-## قانون قفل‌شده
+This contains everything you need to run your app locally.
 
-هایپرمارکت فقط برای خوراکی/نوشیدنی/تنقلات/کیک/شکلات/آبمیوه/قهوه/مواد غذایی است.
+View your app in AI Studio: https://ai.studio/apps/drive/1Q7JAmE9EgCFDA38T1mszmzrl9bLfKDSR
 
-## ممنوع قطعی
+## Run Locally
 
-شامپو، ماسک مو، کرم مو، نرم‌کننده مو، کرم پوست، لوسیون، ضدآفتاب و محصولات آرایشی/بهداشتی هرگز نباید هایپرمارکت بگیرند.
+**Prerequisites:**  Node.js
 
-## اعمال عمیق
 
-- انتخاب دسته با `deepSafeInternalCategory`
-- حذف fallback هایپرمارکت برای محصولات غیرخوراکی
-- حذف لینک هایپرمارکت از خروجی نهایی اگر محصول خوراکی نباشد
-- حذف لینک‌های خوراکی مثل قهوه/نوشیدنی/گز/سوهان برای محصولات مو و پوست
-- کنترل سمت سرور و سمت فرانت
-- بررسی وجود کدها با اسکریپت Verify انجام شده است.
+1. Install dependencies:
+   `npm install`
+2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
+3. Run the app:
+   `npm run dev`
