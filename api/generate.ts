@@ -74,11 +74,11 @@ const productSchema = {
   properties: {
     correctedProductName: {
       type: Type.STRING,
-      description: "نام فارسی صحیح، کوتاه و فروشگاهی محصول. اگر حجم، وزن، تعداد یا واحدهایی مثل ml، میلی‌لیتر، گرم، oz روی تصویر یا ورودی وجود دارد، حتماً در نام محصول بیاور. فقط یک ویژگی مهم و کوتاه محصول را اضافه کن و نام را تبلیغاتی یا خیلی بلند نکن.",
+      description: "نام فارسی صحیح، کوتاه و فروشگاهی محصول. حجم/وزن/تعداد را فقط وقتی بیاور که در تصویر واضح دیده می‌شود یا کاربر در ورودی نوشته است؛ هرگز حجم را حدس نزن. اگر یک حجم با دو واحد معادل دیده شد، فقط یکی را بنویس. فقط یک ویژگی مهم و کوتاه محصول را اضافه کن و نام را تبلیغاتی یا خیلی بلند نکن.",
     },
     englishProductName: {
       type: Type.STRING,
-      description: "نام انگلیسی دقیق محصول. اگر حجم، وزن، تعداد، ml، g یا oz در تصویر یا ورودی وجود دارد، در نام انگلیسی هم حفظ شود؛ اما نام طولانی و تبلیغاتی نشود.",
+      description: "نام انگلیسی دقیق محصول. حجم/وزن/تعداد را فقط وقتی حفظ کن که در تصویر واضح دیده می‌شود یا کاربر نوشته است؛ هرگز از روی حدس حجم اضافه نکن و دو واحد معادل مثل 353ml و 353 میلی‌لیتر را کنار هم ننویس.",
     },
     fullDescription: {
       type: Type.STRING,
@@ -131,8 +131,9 @@ const systemInstruction = `
 
 # قانون مهم نام محصول
 - فیلد correctedProductName باید کوتاه، دقیق و مناسب عنوان محصول وردپرس باشد؛ نه خیلی خلاصه و نه خیلی بلند.
-- قالب پیشنهادی: نوع محصول + ویژگی کلیدی کوتاه + برند + حجم/وزن/تعداد اگر در تصویر یا ورودی وجود دارد.
-- حجم/وزن/تعداد مثل 400ml، 13.5oz، 250 گرم، ۱۵ میلی‌لیتر یا ۱۲ عددی اگر روی محصول دیده شد یا کاربر نوشت، حتماً حفظ شود.
+- قالب پیشنهادی: نوع محصول + ویژگی کلیدی کوتاه + برند + حجم/وزن/تعداد فقط اگر واقعاً در تصویر واضح است یا کاربر نوشته است.
+- حجم/وزن/تعداد مثل 400ml، 13.5oz، 250 گرم، ۱۵ میلی‌لیتر یا ۱۲ عددی را هرگز از روی حدس، شناخت برند یا بسته‌بندی رایج اضافه نکن.
+- اگر یک حجم با دو شکل معادل دیده شد، فقط یکی را در نام محصول بنویس؛ مثلاً ننویس «353ml 353 میلی‌لیتر».
 - فقط ۱ یا نهایتاً ۲ ویژگی واقعاً مهم را در نام بیاور؛ مثل بدون سولفات، شی باتر، ضد شوره، مخصوص موهای فر، آبرسان، SPF50.
 - از کلمات تبلیغاتی اضافه مثل بهترین، فوق‌العاده، عالی، تضمینی، ویژه و جمله‌های طولانی در نام محصول استفاده نکن.
 - طول correctedProductName ترجیحاً بین ۴۰ تا ۷۵ کاراکتر باشد.
@@ -667,8 +668,8 @@ const buildSchemaInstruction = (): string => `
 # ساختار خروجی JSON الزامی
 فقط و فقط یک JSON معتبر برگردان. هیچ متن، توضیح، مارک‌داون یا کدبلاک بیرون JSON ننویس. در fullDescription هیچ لینک داخلی، جمله پیشنهادی لینک‌سازی، کلیک کنید یا مشاهده دسته‌بندی ننویس.
 کلیدهای JSON باید دقیقاً این‌ها باشند:
-- correctedProductName: string؛ نام فارسی کوتاه و دقیق محصول؛ شامل نوع محصول + ویژگی مهم کوتاه + برند + حجم/وزن/تعداد اگر در ورودی یا تصویر وجود دارد؛ ترجیحاً ۴۰ تا ۷۵ کاراکتر و بدون متن تبلیغاتی
-- englishProductName: string؛ نام انگلیسی دقیق محصول، با حفظ حجم/وزن/oz/ml اگر وجود دارد
+- correctedProductName: string؛ نام فارسی کوتاه و دقیق محصول؛ شامل نوع محصول + ویژگی مهم کوتاه + برند + حجم/وزن/تعداد فقط اگر در ورودی نوشته شده یا در تصویر واضح است؛ ترجیحاً ۴۰ تا ۷۵ کاراکتر و بدون متن تبلیغاتی؛ هرگز دو حجم معادل را کنار هم ننویس
+- englishProductName: string؛ نام انگلیسی دقیق محصول؛ حجم/وزن/oz/ml فقط اگر در ورودی نوشته شده یا در تصویر واضح است؛ بدون حدس و بدون تکرار دو واحد معادل
 - fullDescription: string؛ HTML کامل مطابق قوانین بالا
 - shortDescription: string؛ بدون bold و بدون HTML
 - seoTitle: string؛ حداکثر ۶۰ کاراکتر
@@ -819,70 +820,124 @@ const normalizeProductNameSpaces = (value: string): string => String(value || ''
   .replace(/[\n\t]+/g, ' ')
   .replace(/\s+/g, ' ')
   .replace(/\s+([،,.])/g, '$1')
+  .replace(/[-–—]\s*$/g, '')
   .trim();
+
+const toLatinDigits = (value: string): string => String(value || '')
+  .replace(/[۰-۹]/g, digit => String('۰۱۲۳۴۵۶۷۸۹'.indexOf(digit)))
+  .replace(/[٠-٩]/g, digit => String('٠١٢٣٤٥٦٧٨٩'.indexOf(digit)))
+  .replace(/٫/g, '.');
+
+const MEASUREMENT_REGEX = /[0-9۰-۹٠-٩]+(?:[.,٫][0-9۰-۹٠-٩]+)?\s*(?:fl\.?\s*oz|oz|اونس|ml|mL|ML|میلی\s*لیتر|میلی‌لیتر|میلیلیتر|میلی\s*لیتری|میلی‌لیتری|لیتر|l|L|g|G|گرم|kg|KG|کیلو\s*گرم|کیلوگرم|عدد|عددی|تایی|تا|حبه|بسته)/gi;
+
+const normalizeMeasurementUnit = (unit: string): string => {
+  const normalized = String(unit || '')
+    .toLowerCase()
+    .replace(/[\s‌\.]/g, '');
+
+  if (normalized.includes('oz') || normalized.includes('اونس')) return normalized.includes('fl') ? 'fl oz' : 'oz';
+  if (normalized.includes('ml') || normalized.includes('میلی')) return 'ml';
+  if (normalized === 'l' || normalized.includes('لیتر')) return 'L';
+  if (normalized.includes('kg') || normalized.includes('کیلو')) return 'kg';
+  if (normalized === 'g' || normalized.includes('گرم')) return 'g';
+  if (normalized.includes('عدد') || normalized.includes('تایی') || normalized === 'تا' || normalized.includes('حبه') || normalized.includes('بسته')) return unit.trim();
+  return unit.trim();
+};
+
+const canonicalizeMeasurement = (raw: string, englishUnit = false): string => {
+  const cleaned = normalizeProductNameSpaces(raw).replace(/٫/g, '.');
+  const match = cleaned.match(/^([0-9۰-۹٠-٩]+(?:[.,.][0-9۰-۹٠-٩]+)?)\s*(.+)$/i);
+  if (!match) return cleaned;
+
+  const number = englishUnit ? toLatinDigits(match[1]).replace(',', '.') : match[1];
+  const unit = normalizeMeasurementUnit(match[2]);
+
+  if (unit === 'ml' || unit === 'oz' || unit === 'g' || unit === 'kg' || unit === 'L' || unit === 'fl oz') {
+    return `${number}${unit}`;
+  }
+
+  return normalizeProductNameSpaces(`${number} ${unit}`);
+};
 
 const extractProductMeasurements = (text: string): string[] => {
   const source = String(text || '');
-  const number = '[0-9۰-۹]+(?:[.,٫][0-9۰-۹]+)?';
-  const unit = '(?:fl\.?\s*oz|oz|اونس|ml|mL|ML|میلی\s*لیتر|میل|l|L|لیتر|g|G|گرم|kg|KG|کیلو\s*گرم|کیلوگرم|عدد|عددی|تایی|تا|حبه|بسته)';
-  const regex = new RegExp(`${number}\s*${unit}`, 'gi');
-  const matches = source.match(regex) || [];
+  const matches = source.match(MEASUREMENT_REGEX) || [];
   const unique: string[] = [];
+
   for (const item of matches) {
-    const cleaned = normalizeProductNameSpaces(item);
-    const key = normalizeText(cleaned);
-    if (cleaned && !unique.some(existing => normalizeText(existing) === key)) {
-      unique.push(cleaned);
-    }
+    const cleaned = canonicalizeMeasurement(item);
+    if (!cleaned) continue;
+
+    // برای نام محصول فقط یک اندازه کافی است؛ دو حجم معادل یا چند واحد کنار هم نام را خراب می‌کند.
+    if (unique.length === 0) unique.push(cleaned);
+    break;
   }
-  return unique.slice(0, 2);
+
+  return unique;
 };
 
-const productNameHasMeasurement = (name: string, measurement: string): boolean => {
-  const normalizedName = normalizeText(name).replace(/\s+/g, '');
-  const normalizedMeasurement = normalizeText(measurement).replace(/\s+/g, '');
-  return normalizedName.includes(normalizedMeasurement);
-};
-
-const addMissingMeasurementsToProductName = (name: string, measurements: string[], maxLength = 82): string => {
-  let output = normalizeProductNameSpaces(name);
-  for (const measurement of measurements) {
-    if (!measurement || productNameHasMeasurement(output, measurement)) continue;
-    const candidate = normalizeProductNameSpaces(`${output} ${measurement}`);
-    // حجم و وزن مهم است؛ اگر کمی طولانی شد فقط اولین واحد را اضافه می‌کنیم تا نام از حالت استاندارد خارج نشود.
-    if (candidate.length <= maxLength || measurements.indexOf(measurement) === 0) {
-      output = candidate;
-    }
-  }
-  return output;
-};
+const removeMeasurementsFromProductName = (name: string): string => normalizeProductNameSpaces(
+  String(name || '')
+    .replace(MEASUREMENT_REGEX, ' ')
+    .replace(/\s*[+،,/]\s*$/g, '')
+);
 
 const removeProductNameFillerWords = (name: string): string => normalizeProductNameSpaces(name)
   .replace(/\b(?:بهترین|فوق\s*العاده|عالی|تضمینی|ویژه|جدید|خاص|محبوب)\b/gi, '')
   .replace(/\s{2,}/g, ' ')
   .trim();
 
-const refineGeneratedProductNames = (data: any, productName: string, briefDescription: string): any => {
-  const sourceText = [
-    productName,
-    briefDescription,
-    data.correctedProductName,
-    data.englishProductName,
-    data.fullDescription,
-    data.shortDescription,
-  ].filter(Boolean).join(' ');
+const applySingleTrustedMeasurementToName = (
+  name: string,
+  fallback: string,
+  trustedMeasurements: string[],
+  allowImageDetectedMeasurement: boolean,
+  englishUnit = false,
+  maxLength = 82,
+): string => {
+  const originalName = removeProductNameFillerWords(toText(name, fallback));
+  const cleanBase = removeMeasurementsFromProductName(originalName) || removeMeasurementsFromProductName(fallback);
+  let selectedMeasurement = trustedMeasurements[0] || '';
 
-  const measurements = extractProductMeasurements(sourceText);
-  data.correctedProductName = addMissingMeasurementsToProductName(
-    removeProductNameFillerWords(toText(data.correctedProductName, productName)),
-    measurements,
+  // اگر کاربر چیزی ننوشته ولی تصویر وجود دارد، فقط یک اندازه‌ای را نگه می‌داریم که خود مدل از تصویر خوانده باشد؛ چیزی اضافه نمی‌کنیم.
+  if (!selectedMeasurement && allowImageDetectedMeasurement) {
+    selectedMeasurement = extractProductMeasurements(originalName)[0] || '';
+  }
+
+  // اگر نه کاربر نوشته، نه تصویر داریم، هر حجم حدسی مدل حذف می‌شود.
+  const finalMeasurement = selectedMeasurement ? canonicalizeMeasurement(selectedMeasurement, englishUnit) : '';
+  const candidate = normalizeProductNameSpaces(`${cleanBase}${finalMeasurement ? ` ${finalMeasurement}` : ''}`);
+
+  if (candidate.length <= maxLength || !finalMeasurement) return candidate;
+  return cleanBase;
+};
+
+const refineGeneratedProductNames = (
+  data: any,
+  productName: string,
+  briefDescription: string,
+  hasProductImage: boolean,
+): any => {
+  const trustedMeasurements = extractProductMeasurements([productName, briefDescription].filter(Boolean).join(' '));
+
+  data.correctedProductName = applySingleTrustedMeasurementToName(
+    data.correctedProductName,
+    productName,
+    trustedMeasurements,
+    hasProductImage,
+    false,
     82
   );
-  data.englishProductName = addMissingMeasurementsToProductName(
-    removeProductNameFillerWords(toText(data.englishProductName, '')),
-    measurements,
+
+  data.englishProductName = applySingleTrustedMeasurementToName(
+    data.englishProductName,
+    '',
+    trustedMeasurements,
+    hasProductImage,
+    true,
     95
   );
+
   return data;
 };
 
@@ -937,7 +992,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:
 - نام محصول: "${productName}"
-- قانون نام محصول: نام محصول را کمی کامل‌تر و فروشگاهی بنویس؛ نوع محصول، برند، یک ویژگی مهم و حجم/وزن/تعداد مثل ml، oz، گرم یا عددی را اگر در تصویر/ورودی هست حتماً حفظ کن. نام محصول خیلی بلند، تبلیغاتی یا جمله‌ای نشود.
+- قانون نام محصول: نام محصول را کمی کامل‌تر و فروشگاهی بنویس؛ نوع محصول، برند و یک ویژگی مهم را بیاور. حجم/وزن/تعداد مثل ml، oz، گرم یا عددی را فقط اگر در تصویر واضح است یا کاربر نوشته حفظ کن؛ هرگز حدس نزن. اگر دو واحد معادل مثل 353ml و 353 میلی‌لیتر دیده شد، فقط یکی را بنویس. نام محصول خیلی بلند، تبلیغاتی یا جمله‌ای نشود.
 - هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.
 - هشدار مهم دسته‌بندی: هایپرمارکت فقط مخصوص خوراکی‌ها و محصولات سوپرمارکتی است. اگر محصول آرایشی، بهداشتی، شامپو، عطر، پوست یا مو بود، به هیچ عنوان هایپرمارکت را داخل متن نیاور.`;
     if (briefDescription) {
@@ -995,7 +1050,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     const generatedData = refineGeneratedProductNames(
       normalizeGeneratedProductData(parsedData, productName),
       productName,
-      briefDescription
+      briefDescription,
+      Boolean(productImage)
     );
     const selectedCategory = pickInternalCategory(generatedData, productName, briefDescription, isNutsOrDriedFruit);
 
