@@ -284,7 +284,7 @@ const INTERNAL_CATEGORIES: InternalCategory[] = [
     group: 'beauty',
     priority: 120,
     keywords: [
-      'شامپو', 'شامپو مو', 'شامپو سر', 'شامپو بدن', 'شامپو ضد شوره', 'ضد شوره', 'شوره',
+      'شامپو', 'شامپو مو', 'شامپو سر', 'شامپو ضد شوره', 'ضد شوره', 'شوره',
       'shampoo', 'anti dandruff', 'clear shampoo'
     ]
   },
@@ -478,14 +478,14 @@ const ALL_SITE_CATEGORIES: InternalCategory[] = [
   { title: "بادام زمینی", url: categoryUrl("product-category/nuts/peanuts/"), group: "food", priority: 45, keywords: ["بادام زمینی", "peanuts"] },
   { title: "بادام هندی", url: categoryUrl("product-category/nuts/nut/cashew/"), group: "food", priority: 45, keywords: ["بادام هندی", "cashew"] },
   { title: "بادی اسپلش", url: categoryUrl("product-category/cosmetics/perfume/bod-splash/"), group: "beauty", priority: 45, keywords: ["بادی اسپلش", "bod splash"] },
-  { title: "بدن و حمام", url: categoryUrl("product-category/deodorant-spray/body-bath/"), group: "beauty", priority: 45, keywords: ["بدن و حمام", "body bath"] },
+  { title: "بدن و حمام", url: categoryUrl("product-category/deodorant-spray/body-bath/"), group: "beauty", priority: 45, keywords: ["بدن و حمام", "body bath", "شامپو بدن", "بادی واش", "ژل حمام", "صابون بدن", "body wash", "shower gel", "bath"] },
   { title: "بدن و حمام", url: categoryUrl("product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d8%af%d9%86-%d9%88-%d8%ad%d9%85%d8%a7%d9%85/"), group: "other", priority: 25, keywords: ["بدن و حمام"] },
   { title: "برگه ها", url: categoryUrl("product-category/nuts/dried-fruits/appricot/"), group: "food", priority: 45, keywords: ["برگه ها", "appricot"] },
   { title: "برنج", url: categoryUrl("product-category/nuts/%d8%a8%d8%b1%d9%86%d8%ac/"), group: "food", priority: 45, keywords: ["برنج"] },
   { title: "بهداشت بانوان و آقایان", url: categoryUrl("product-category/deodorant-spray/women-men-care/"), group: "beauty", priority: 45, keywords: ["بهداشت بانوان و آقایان", "women men care"] },
   { title: "بهداشت بانوان و آقایان", url: categoryUrl("product-category/%d8%af%d8%a6%d9%88%d8%af%d8%b1%d8%a7%d9%86%d8%aa-%d9%88-%d8%b6%d8%af-%d8%aa%d8%b9%d8%b1%db%8c%d9%82/%d8%a8%d9%87%d8%af%d8%a7%d8%b4%d8%aa-%d8%a8%d8%a7%d9%86%d9%88%d8%a7%d9%86-%d9%88-%d8%a2%d9%82%d8%a7%db%8c%d8%a7%d9%86/"), group: "beauty", priority: 45, keywords: ["بهداشت بانوان و آقایان"] },
-  { title: "بهداشت دهان و دندان", url: categoryUrl("product-category/cosmetics/personal-care/mouth-teeth/"), group: "beauty", priority: 45, keywords: ["بهداشت دهان و دندان", "mouth teeth"] },
-  { title: "بهداشت شخصی", url: categoryUrl("product-category/cosmetics/personal-care/"), group: "beauty", priority: 45, keywords: ["بهداشت شخصی", "personal care"] },
+  { title: "بهداشت دهان و دندان", url: categoryUrl("product-category/cosmetics/personal-care/mouth-teeth/"), group: "beauty", priority: 45, keywords: ["بهداشت دهان و دندان", "mouth teeth", "دهان", "دندان", "خمیر دندان", "مسواک", "دهانشویه", "toothpaste", "mouthwash", "oral care"] },
+  { title: "بهداشت شخصی", url: categoryUrl("product-category/cosmetics/personal-care/"), group: "beauty", priority: 45, keywords: ["بهداشت شخصی", "personal care", "بهداشتی", "لوازم بهداشتی", "بهداشت بانوان", "بهداشت آقایان", "personal hygiene"] },
   { title: "بیسکوویت", url: categoryUrl("product-category/hypermarket/biscuit/"), group: "food", priority: 45, keywords: ["بیسکوویت", "biscuit", "بیسکویت"] },
   { title: "پاک کننده و شوینده", url: categoryUrl("product-category/skincare/cleanser/"), group: "beauty", priority: 45, keywords: ["پاک کننده و شوینده", "cleanser"] },
   { title: "پسته احمد آقایی", url: categoryUrl("product-category/nuts/nut/pistachios/pistachio-ahmad-aghaei/"), group: "food", priority: 45, keywords: ["پسته احمد آقایی", "pistachio ahmad aghaei"] },
@@ -591,12 +591,12 @@ const ALL_SITE_CATEGORIES: InternalCategory[] = [
   { title: "لوسیون بدن", url: categoryUrl("product-category/%d9%84%d9%88%d8%b3%db%8c%d9%88%d9%86-%d8%a8%d8%af%d9%86/"), group: "beauty", priority: 45, keywords: ["لوسیون بدن"] },
   { title: "محصولات کادوئی", url: categoryUrl("product-category/gifts/"), group: "other", priority: 25, keywords: ["محصولات کادوئی", "gifts"] },
   { title: "مراقبت از مو", url: categoryUrl("product-category/cosmetics/hair/hair-care/"), group: "beauty", priority: 45, keywords: ["مراقبت از مو", "hair care"] },
-  { title: "مراقبت بدن", url: categoryUrl("product-category/skincare/body-care/"), group: "beauty", priority: 45, keywords: ["مراقبت بدن", "body care"] },
+  { title: "مراقبت بدن", url: categoryUrl("product-category/skincare/body-care/"), group: "beauty", priority: 45, keywords: ["مراقبت بدن", "body care", "بدن", "کرم بدن", "لوسیون بدن", "بالم", "پماد", "تسکین درد", "ضد درد", "درد عضلانی", "درد مفصلی", "کوفتگی", "ماساژ", "ointment", "pain relief", "fast relief", "muscle pain", "joint pain", "rub"] },
   { title: "مراقبت پا", url: categoryUrl("product-category/skincare/feet-care/"), group: "beauty", priority: 45, keywords: ["مراقبت پا", "feet care"] },
-  { title: "مراقبت پوست", url: categoryUrl("product-category/skincare/"), group: "beauty", priority: 30, keywords: ["مراقبت پوست", "skincare"] },
+  { title: "مراقبت پوست", url: categoryUrl("product-category/skincare/"), group: "beauty", priority: 30, keywords: ["مراقبت پوست", "skincare", "پوست", "آبرسان", "مرطوب کننده", "مرطوب‌کننده", "سرم", "تونر", "میسلار", "کرم", "skin care", "moisturizer", "serum", "toner"] },
   { title: "مراقبت چشم و ابرو", url: categoryUrl("product-category/skincare/eye-care/"), group: "beauty", priority: 45, keywords: ["مراقبت چشم و ابرو", "eye care"] },
   { title: "مراقبت دست و ناخن", url: categoryUrl("product-category/skincare/hand-nail-treat/"), group: "beauty", priority: 45, keywords: ["مراقبت دست و ناخن", "hand nail treat"] },
-  { title: "مراقبت صورت", url: categoryUrl("product-category/skincare/face-care/"), group: "beauty", priority: 45, keywords: ["مراقبت صورت", "face care"] },
+  { title: "مراقبت صورت", url: categoryUrl("product-category/skincare/face-care/"), group: "beauty", priority: 45, keywords: ["مراقبت صورت", "face care", "صورت", "کرم صورت", "شوینده صورت", "پاک کننده صورت", "ژل شستشو", "فوم شستشو", "ماسک صورت", "facial", "face wash"] },
   { title: "مراقبت لب", url: categoryUrl("product-category/skincare/lip-care/"), group: "beauty", priority: 45, keywords: ["مراقبت لب", "lip care"] },
   { title: "مراقبت و زیبایی مو", url: categoryUrl("product-category/cosmetics/hair/"), group: "beauty", priority: 30, keywords: ["مراقبت و زیبایی مو", "hair"] },
   { title: "مغز پسته خام", url: categoryUrl("product-category/nuts/nut/pistachios/raw-pistachio/"), group: "food", priority: 45, keywords: ["مغز پسته خام", "raw pistachio"] },
@@ -714,14 +714,26 @@ const pickExplicitCategoryFromUserText = (rawText: string): InternalCategory | n
 
 const hasBeautySignal = (text: string): boolean => {
   const beautySignals = [
-    'شامپو', 'شامپو مو', 'شامپو بدن', 'ضد شوره', 'ماسک مو', 'سرم مو', 'نرم کننده مو', 'نرم‌کننده مو',
-    'رنگ مو', 'اکسیدان', 'دکلره', 'کراتین', 'پوست', 'کرم صورت', 'کرم دست', 'کرم دور چشم',
-    'ضد آفتاب', 'ضدآفتاب', 'مرطوب کننده', 'مرطوب‌کننده', 'آبرسان', 'شوینده صورت',
-    'ژل شستشو', 'فوم شستشو', 'تونر', 'میسلار', 'شیر پاک کن', 'پاک کن آرایش',
-    'آرایش', 'آرایشی', 'لوازم آرایشی', 'بهداشتی', 'لوازم بهداشتی', 'عطر', 'ادکلن',
-    'دئودرانت', 'دئودورانت', 'ضد تعریق', 'ضدتعریق', 'مام', 'اسپری بدن', 'بادی اسپلش',
-    'لاک', 'رژ', 'ریمل', 'خط چشم', 'cosmetic', 'cosmetics', 'makeup', 'skincare',
-    'skin care', 'shampoo', 'hair mask', 'perfume', 'fragrance', 'deodorant'
+    // مو
+    'شامپو', 'شامپو مو', 'شامپو بدن', 'ضد شوره', 'ماسک مو', 'اسکراب مو', 'سرم مو', 'نرم کننده مو', 'نرم‌کننده مو',
+    'رنگ مو', 'اکسیدان', 'دکلره', 'کراتین', 'حالت دهنده مو', 'فر مو', 'موهای فر', 'hair', 'shampoo', 'conditioner', 'hair mask',
+
+    // پوست، صورت و بدن
+    'پوست', 'مراقبت پوست', 'مراقبت صورت', 'مراقبت بدن', 'مراقبت پا', 'مراقبت لب', 'مراقبت چشم',
+    'کرم صورت', 'کرم دست', 'کرم بدن', 'کرم دور چشم', 'دور چشم', 'لوسیون', 'لوسیون بدن', 'بالم', 'بالم لب',
+    'ضد آفتاب', 'ضدآفتاب', 'مرطوب کننده', 'مرطوب‌کننده', 'آبرسان', 'ضدجوش', 'جوش', 'سرم صورت', 'تونر', 'میسلار',
+    'شوینده صورت', 'ژل شستشو', 'فوم شستشو', 'پاک کننده صورت', 'پاک‌کننده صورت', 'شیر پاک کن', 'پاک کن آرایش',
+    'skincare', 'skin care', 'face care', 'body care', 'sunscreen', 'acne', 'moisturizer', 'cleanser', 'toner', 'serum',
+
+    // بهداشتی، مراقبت شخصی و محصولات موضعی بدن
+    'پماد', 'کرم موضعی', 'ژل موضعی', 'مسکن موضعی', 'تسکین درد', 'ضد درد', 'درد عضلانی', 'درد مفصلی', 'کوفتگی',
+    'ماساژ', 'حرارتی', 'کمربند حرارتی', 'ointment', 'balm', 'pain relief', 'fast relief', 'muscle pain', 'joint pain', 'herbal pain', 'rub',
+    'بهداشت شخصی', 'بهداشتی', 'لوازم بهداشتی', 'دهان و دندان', 'خمیر دندان', 'دهانشویه', 'مسواک', 'اصلاح', 'لوازم اصلاح',
+
+    // آرایشی و عطر
+    'آرایش', 'آرایشی', 'لوازم آرایشی', 'رژ', 'رژلب', 'ریمل', 'خط چشم', 'مداد چشم', 'کرم پودر', 'پنکک', 'کانسیلر', 'لاک', 'ناخن',
+    'عطر', 'ادکلن', 'پرفیوم', 'فرگرنس', 'دئودرانت', 'دئودورانت', 'ضد تعریق', 'ضدتعریق', 'مام', 'اسپری بدن', 'بادی اسپلش',
+    'cosmetic', 'cosmetics', 'makeup', 'perfume', 'fragrance', 'deodorant', 'antiperspirant'
   ];
   return beautySignals.some(signal => countKeywordMatches(text, [signal]) > 0);
 };
@@ -766,7 +778,10 @@ ${briefDescription}`);
   const beautySignal = hasBeautySignal(allText);
   const foodSignal = hasFoodSignal(allText);
 
-  // قوانین قطعی و اولویت‌دار: شامپو و محصولات آرایشی/بهداشتی هیچ‌وقت نباید هایپرمارکت شوند.
+  // قوانین قطعی و اولویت‌دار: اول دسته‌های مهم و پرکاربرد. هایپرمارکت فقط برای خوراکی‌هاست.
+  if (allText.includes('شامپو بدن') || allText.includes('بادی واش') || /\b(body wash|bath)\b/i.test(allText)) {
+    return getCategory('بدن و حمام');
+  }
   if (/\b(shampoo|anti dandruff)\b/i.test(allText) || allText.includes('شامپو') || allText.includes('ضد شوره')) {
     return getCategory('شامپو');
   }
@@ -776,6 +791,54 @@ ${briefDescription}`);
   if (allText.includes('دئودرانت') || allText.includes('دئودورانت') || allText.includes('ضد تعریق') || allText.includes('ضدتعریق') || allText.includes('مام') || allText.includes('اسپری بدن') || allText.includes('بادی اسپلش') || /\b(deodorant|antiperspirant|body spray|body splash)\b/i.test(allText)) {
     return getCategory(BEAUTY_FALLBACK_CATEGORY_TITLE);
   }
+
+  // پوست و مراقبت‌های دقیق‌تر
+  if (allText.includes('ضد آفتاب') || allText.includes('ضدآفتاب') || /\b(sunscreen|spf)\b/i.test(allText)) {
+    return getCategory('ضد آفتاب');
+  }
+  if (allText.includes('ضدجوش') || allText.includes('ضد جوش') || allText.includes('جوش') || /\bacne\b/i.test(allText)) {
+    return getCategory('ضدجوش');
+  }
+  if (allText.includes('شوینده صورت') || allText.includes('پاک کننده صورت') || allText.includes('پاک‌کننده صورت') || allText.includes('ژل شستشو') || allText.includes('فوم شستشو') || /\b(cleanser|face wash)\b/i.test(allText)) {
+    return getCategory('پاک کننده و شوینده');
+  }
+  if (allText.includes('کرم دست')) {
+    return getCategory('کرم دست');
+  }
+  if (allText.includes('لوسیون بدن') || /\bbody lotion\b/i.test(allText)) {
+    return getCategory('لوسیون بدن');
+  }
+  if (allText.includes('لوسیون')) {
+    return getCategory('لوسیون');
+  }
+  if (allText.includes('کرم دور چشم') || allText.includes('دور چشم') || /\beye care|eye cream\b/i.test(allText)) {
+    return getCategory('مراقبت چشم و ابرو');
+  }
+  if (allText.includes('مراقبت لب') || allText.includes('بالم لب') || /\blip care|lip balm\b/i.test(allText)) {
+    return getCategory('مراقبت لب');
+  }
+  if (allText.includes('مراقبت پا') || allText.includes('کرم پا') || allText.includes('پاشنه') || /\bfoot|feet care\b/i.test(allText)) {
+    return getCategory('مراقبت پا');
+  }
+  if (allText.includes('دست و ناخن') || allText.includes('مراقبت دست') || /\bhand nail\b/i.test(allText)) {
+    return getCategory('مراقبت دست و ناخن');
+  }
+  if (allText.includes('صورت') || allText.includes('کرم صورت') || /\bface care|facial\b/i.test(allText)) {
+    return getCategory('مراقبت صورت');
+  }
+
+  // محصولات موضعی/بدنی مثل پماد درد، بالم، ماساژ و محصولات گیاهی تسکین‌دهنده؛ خوراکی نیستند.
+  if (allText.includes('پماد') || allText.includes('تسکین درد') || allText.includes('ضد درد') || allText.includes('درد عضلانی') || allText.includes('درد مفصلی') || allText.includes('کوفتگی') || allText.includes('کرم موضعی') || allText.includes('ژل موضعی') || /\b(ointment|pain relief|fast relief|muscle pain|joint pain|herbal balm|rub)\b/i.test(allText)) {
+    return getCategory('مراقبت بدن');
+  }
+  if (allText.includes('دهان') || allText.includes('دندان') || allText.includes('خمیر دندان') || allText.includes('دهانشویه') || allText.includes('مسواک') || /\b(toothpaste|mouthwash|oral care)\b/i.test(allText)) {
+    return getCategory('بهداشت دهان و دندان');
+  }
+  if (allText.includes('اصلاح') || allText.includes('ریش') || allText.includes('ژیلت') || /\b(shaving|razor)\b/i.test(allText)) {
+    return getCategory('لوازم اصلاح');
+  }
+
+  // خوراکی‌های دقیق و معروف
   if (allText.includes('پنیر') || /\bcheese\b/i.test(allText)) {
     return getCategory('پنیر');
   }
@@ -785,6 +848,10 @@ ${briefDescription}`);
 
   let bestCategory: InternalCategory | null = null;
   let bestScore = 0;
+  let bestBeautyCategory: InternalCategory | null = null;
+  let bestBeautyScore = 0;
+  let bestFoodCategory: InternalCategory | null = null;
+  let bestFoodScore = 0;
 
   for (const category of CATEGORY_POOL) {
     const userScore = countKeywordMatches(userText, category.keywords) * 10;
@@ -795,24 +862,28 @@ ${briefDescription}`);
       bestScore = totalScore;
       bestCategory = category;
     }
-  }
-
-  if (bestCategory && bestScore > 0) {
-    // قفل ضد اشتباه: اگر کوچک‌ترین سیگنال آرایشی/بهداشتی وجود داشت، انتخاب خوراکی/هایپرمارکت ممنوع است.
-    if (beautySignal && bestCategory.group === 'food') {
-      return getCategory(BEAUTY_FALLBACK_CATEGORY_TITLE);
+    if (category.group === 'beauty' && totalScore > bestBeautyScore) {
+      bestBeautyScore = totalScore;
+      bestBeautyCategory = category;
     }
-    return bestCategory;
+    if (category.group === 'food' && category.title !== 'هایپرمارکت' && totalScore > bestFoodScore) {
+      bestFoodScore = totalScore;
+      bestFoodCategory = category;
+    }
   }
 
-  // اگر محصول آرایشی/بهداشتی است ولی دسته دقیق ندارد، به دسته مادر آرایشی‌بهداشتی لینک بده.
+  // اگر کوچک‌ترین سیگنال آرایشی/بهداشتی/بدنی/پوستی وجود داشت، انتخاب خوراکی و هایپرمارکت ممنوع است.
   if (beautySignal) {
-    return getCategory(BEAUTY_FALLBACK_CATEGORY_TITLE);
+    return bestBeautyScore > 0 && bestBeautyCategory ? bestBeautyCategory : getCategory(BEAUTY_FALLBACK_CATEGORY_TITLE);
   }
 
-  // هایپرمارکت فقط برای خوراکی‌هاست؛ شامپو، کرم، عطر، بهداشتی و آرایشی هرگز وارد این شرط نمی‌شوند.
+  // اگر واقعاً خوراکی بود، دسته دقیق خوراکی را بگیر؛ اگر نداشت فقط آن وقت هایپرمارکت.
   if (foodSignal && !beautySignal) {
-    return HYPERMARKET_FALLBACK_CATEGORY;
+    return bestFoodScore > 0 && bestFoodCategory ? bestFoodCategory : HYPERMARKET_FALLBACK_CATEGORY;
+  }
+
+  if (bestCategory && bestScore > 0 && bestCategory.title !== 'هایپرمارکت') {
+    return bestCategory;
   }
 
   return null;
@@ -1347,7 +1418,7 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
 - قانون نام محصول: نام محصول را کمی کامل‌تر و فروشگاهی بنویس؛ نوع محصول، برند و یک ویژگی مهم را بیاور. حجم/وزن/تعداد فقط اگر در تصویر واضح است یا کاربر نوشته حفظ کن؛ هرگز حدس نزن. در نام فارسی محصول، ml را به «میلی‌لیتر» تبدیل کن و هرگز کنار آن شکل انگلیسی را تکرار نکن. اگر دو واحد معادل مثل 353ml و 353 میلی‌لیتر دیده شد، فقط «353 میلی‌لیتر» را نگه دار. نام محصول خیلی بلند، تبلیغاتی یا جمله‌ای نشود.
 - قانون ویژگی واقعی: کلمات مهم داخل نام محصول را حتماً در توضیحات کامل توضیح بده؛ مثلاً Coconut Oil یعنی روغن نارگیل، Shine & Hold یعنی درخشندگی و حفظ حالت، Mist یعنی میست/اسپری سبک، Shea Butter یعنی شی باتر. فقط توضیح عمومی درباره دسته محصول ننویس.
 - هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.
-- هشدار مهم دسته‌بندی: هایپرمارکت فقط مخصوص خوراکی‌ها و محصولات سوپرمارکتی است. اگر محصول آرایشی، بهداشتی، شامپو، عطر، پوست یا مو بود، به هیچ عنوان هایپرمارکت را داخل متن نیاور.`;
+- هشدار مهم دسته‌بندی: هایپرمارکت فقط مخصوص خوراکی‌ها و محصولات سوپرمارکتی مثل کیک، شکلات، آبمیوه، نوشیدنی، چیپس، بیسکویت و پنیر است. اگر محصول آرایشی، بهداشتی، پوستی، بدنی، شامپو، عطر، مو، پماد، مسکن موضعی، مراقبت بدن، مراقبت صورت یا مراقبت پوست بود، به هیچ عنوان هایپرمارکت را داخل متن نیاور.`;
     if (briefDescription) {
         userPrompt += `
 - توضیحات اولیه: "${briefDescription}"`;
