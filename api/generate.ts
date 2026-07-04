@@ -132,11 +132,16 @@ const systemInstruction = `
 # قانون مهم نام محصول
 - فیلد correctedProductName باید کوتاه، دقیق و مناسب عنوان محصول وردپرس باشد؛ نه خیلی خلاصه و نه خیلی بلند.
 - قالب پیشنهادی: نوع محصول + ویژگی کلیدی کوتاه + برند + حجم/وزن/تعداد فقط اگر واقعاً در تصویر واضح است یا کاربر نوشته است.
-- حجم/وزن/تعداد مثل 400ml، 13.5oz، 250 گرم، ۱۵ میلی‌لیتر یا ۱۲ عددی را هرگز از روی حدس، شناخت برند یا بسته‌بندی رایج اضافه نکن.
-- اگر یک حجم با دو شکل معادل دیده شد، فقط یکی را در نام محصول بنویس؛ مثلاً ننویس «353ml 353 میلی‌لیتر».
+- حجم/وزن/تعداد مثل ۴۰۰ میلی‌لیتر، 13.5oz، ۲۵۰ گرم یا ۱۲ عددی را هرگز از روی حدس، شناخت برند یا بسته‌بندی رایج اضافه نکن. برای نام فارسی محصول، واحد ml را همیشه به صورت «میلی‌لیتر» بنویس، نه ml.
+- اگر یک حجم با دو شکل معادل دیده شد، فقط یکی را در نام محصول بنویس؛ مثلاً ننویس «353ml 353 میلی‌لیتر». در نام فارسی، شکل درست «۳۵۳ میلی‌لیتر» یا «353 میلی‌لیتر» است و نباید کنار آن ml تکرار شود.
 - فقط ۱ یا نهایتاً ۲ ویژگی واقعاً مهم را در نام بیاور؛ مثل بدون سولفات، شی باتر، ضد شوره، مخصوص موهای فر، آبرسان، SPF50.
 - از کلمات تبلیغاتی اضافه مثل بهترین، فوق‌العاده، عالی، تضمینی، ویژه و جمله‌های طولانی در نام محصول استفاده نکن.
 - طول correctedProductName ترجیحاً بین ۴۰ تا ۷۵ کاراکتر باشد.
+
+# قانون مهم توضیحات کامل
+- ویژگی‌های اصلی و مشخصات محصول باید از خود نام محصول، تصویر و توضیحات اولیه استخراج شود؛ متن عمومی و کلی ننویس.
+- اگر در نام یا تصویر ترکیب/ویژگی مشخصی مثل Coconut Oil، Shea Butter، Keratin، Aloe Vera، SPF، Sulfate-Free، Curl Activator، Shine & Hold، Anti-Dandruff، Moisturizing یا مشابه آن وجود داشت، معادل فارسی و توضیح کوتاه آن باید حتماً در fullDescription بیاید.
+- اگر نام محصول با تصویر تناقض داشت، نام محصول و توضیحات اولیه کاربر را مبنای اصلی قرار بده و از تصویر فقط برای جزئیات تکمیلی مثل برند، حجم و نوشته‌های واضح استفاده کن.
 `;
 
 const nuts_description_prompt = `
@@ -206,7 +211,9 @@ const standard_description_prompt = `
 
 # 1. قوانین کلی محتوا (Yoast SEO)
 - **طول متن:** کل توضیحات باید بین ۲۵۰ تا ۳۵۰ کلمه باشد.
-- **جزئیات مهم محصول:** اگر روی تصویر یا ورودی حجم، وزن، تعداد، رایحه، مدل، SPF، نوع مو/پوست، بدون سولفات، بدون شکر، کشور سازنده یا ویژگی مهمی وجود دارد، در بخش مشخصات محصول یا ویژگی‌های اصلی حتماً بیاور.
+- **جزئیات مهم محصول:** اگر روی تصویر یا ورودی حجم، وزن، تعداد، رایحه، مدل، SPF، نوع مو/پوست، بدون سولفات، بدون شکر، کشور سازنده، ترکیب کلیدی یا ویژگی مهمی وجود دارد، در بخش مشخصات محصول یا ویژگی‌های اصلی حتماً بیاور.
+- **قانون بسیار مهم ویژگی واقعی محصول:** متن را فقط بر اساس دسته کلی محصول ننویس. هر کلمه مهمی که در نام محصول آمده، باید در توضیحات کامل هم دیده شود. مثال: اگر نام محصول شامل Coconut Oil است، باید «روغن نارگیل» را در ویژگی‌ها/مزایا توضیح بده؛ اگر شامل Shine & Hold Mist است، باید به «درخشندگی»، «حفظ حالت» و «میست/اسپری» اشاره شود. اگر نام شامل Shea Butter، Keratin، Aloe Vera، SPF، Sulfate-Free، Anti-Dandruff، Curl Activator یا هر ویژگی واقعی دیگر است، همان ویژگی باید در متن و مشخصات محصول بیاید.
+- **عدم کلی‌گویی:** فقط درباره نوع محصول مثل شامپو، کرم یا اسپری توضیح عمومی نده؛ ویژگی اختصاصی همین محصول و ترکیبات/ادعاهای روی بسته را واضح بنویس.
 - **پاراگراف‌ها:** یک پاراگراف مقدمه جذاب با طول ۳۰ تا ۴۰ کلمه بنویس. سایر پاراگراف‌ها باید بین ۴۰ تا ۶۰ کلمه باشند.
 - **خوانایی:** جملات باید کوتاه (حداکثر ۲۰ کلمه) باشند. حداقل در ۲۵٪ جملات از کلمات انتقالی استفاده کن و میزان استفاده از صدای مجهول را به کمتر از ۱۰٪ محدود کن.
 - **استفاده از کلیدواژه کانونی:** کلیدواژه باید در پاراگراف اول (۵۰ کلمه ابتدایی) بیاید و به طور طبیعی ۳ تا ۴ بار در کل متن تکرار شود.
@@ -668,7 +675,7 @@ const buildSchemaInstruction = (): string => `
 # ساختار خروجی JSON الزامی
 فقط و فقط یک JSON معتبر برگردان. هیچ متن، توضیح، مارک‌داون یا کدبلاک بیرون JSON ننویس. در fullDescription هیچ لینک داخلی، جمله پیشنهادی لینک‌سازی، کلیک کنید یا مشاهده دسته‌بندی ننویس.
 کلیدهای JSON باید دقیقاً این‌ها باشند:
-- correctedProductName: string؛ نام فارسی کوتاه و دقیق محصول؛ شامل نوع محصول + ویژگی مهم کوتاه + برند + حجم/وزن/تعداد فقط اگر در ورودی نوشته شده یا در تصویر واضح است؛ ترجیحاً ۴۰ تا ۷۵ کاراکتر و بدون متن تبلیغاتی؛ هرگز دو حجم معادل را کنار هم ننویس
+- correctedProductName: string؛ نام فارسی کوتاه و دقیق محصول؛ شامل نوع محصول + ویژگی مهم کوتاه + برند + حجم/وزن/تعداد فقط اگر در ورودی نوشته شده یا در تصویر واضح است؛ ترجیحاً ۴۰ تا ۷۵ کاراکتر و بدون متن تبلیغاتی؛ هرگز دو حجم معادل را کنار هم ننویس؛ در نام فارسی واحد ml را با «میلی‌لیتر» بنویس نه ml
 - englishProductName: string؛ نام انگلیسی دقیق محصول؛ حجم/وزن/oz/ml فقط اگر در ورودی نوشته شده یا در تصویر واضح است؛ بدون حدس و بدون تکرار دو واحد معادل
 - fullDescription: string؛ HTML کامل مطابق قوانین بالا
 - shortDescription: string؛ بدون bold و بدون HTML
@@ -852,6 +859,15 @@ const canonicalizeMeasurement = (raw: string, englishUnit = false): string => {
   const number = englishUnit ? toLatinDigits(match[1]).replace(',', '.') : match[1];
   const unit = normalizeMeasurementUnit(match[2]);
 
+  if (!englishUnit) {
+    if (unit === 'ml') return normalizeProductNameSpaces(`${number} میلی‌لیتر`);
+    if (unit === 'L') return normalizeProductNameSpaces(`${number} لیتر`);
+    if (unit === 'g') return normalizeProductNameSpaces(`${number} گرم`);
+    if (unit === 'kg') return normalizeProductNameSpaces(`${number} کیلوگرم`);
+    if (unit === 'oz') return normalizeProductNameSpaces(`${number} اونس`);
+    if (unit === 'fl oz') return normalizeProductNameSpaces(`${number} اونس مایع`);
+  }
+
   if (unit === 'ml' || unit === 'oz' || unit === 'g' || unit === 'kg' || unit === 'L' || unit === 'fl oz') {
     return `${number}${unit}`;
   }
@@ -941,6 +957,123 @@ const refineGeneratedProductNames = (
   return data;
 };
 
+type ProductFactRule = {
+  keywords: string[];
+  label: string;
+  dedupeTerms: string[];
+};
+
+const PRODUCT_FACT_RULES: ProductFactRule[] = [
+  {
+    keywords: ['coconut oil', 'روغن نارگیل', 'نارگیل'],
+    label: 'حاوی روغن نارگیل برای کمک به نرمی، لطافت و درخشندگی مو',
+    dedupeTerms: ['روغن نارگیل', 'نارگیل', 'coconut oil']
+  },
+  {
+    keywords: ['shine & hold', 'shine and hold', 'shine hold', 'درخشندگی و حفظ حالت', 'حفظ حالت و درخشندگی'],
+    label: 'کمک به افزایش درخشندگی مو و حفظ حالت بدون ایجاد سنگینی',
+    dedupeTerms: ['shine', 'hold', 'درخشندگی', 'حفظ حالت']
+  },
+  {
+    keywords: ['mist', 'hair mist', 'میست', 'اسپری سبک'],
+    label: 'فرمول میست سبک برای پخش یکنواخت و استفاده آسان روی مو',
+    dedupeTerms: ['mist', 'میست', 'اسپری سبک']
+  },
+  {
+    keywords: ['shea butter', 'شی باتر', 'کره شی'],
+    label: 'حاوی شی باتر برای کمک به تغذیه، نرمی و رطوبت‌رسانی مو',
+    dedupeTerms: ['shea butter', 'شی باتر', 'کره شی']
+  },
+  {
+    keywords: ['sulfate free', 'sulfate-free', 'بدون سولفات', 'فاقد سولفات'],
+    label: 'فاقد سولفات برای پاکسازی ملایم‌تر و کمک به حفظ رطوبت مو',
+    dedupeTerms: ['بدون سولفات', 'فاقد سولفات', 'sulfate']
+  },
+  {
+    keywords: ['curl activator', 'فعال کننده فر', 'فعال‌کننده فر', 'curl activating'],
+    label: 'فعال‌کننده و تعریف‌کننده فر مو برای کمک به فرم‌دهی بهتر موهای فر و مجعد',
+    dedupeTerms: ['curl activator', 'فعال کننده فر', 'فعال‌کننده فر', 'تعریف‌کننده فر']
+  },
+  {
+    keywords: ['keratin', 'کراتین'],
+    label: 'حاوی کراتین برای کمک به تقویت ساقه مو و کاهش شکنندگی',
+    dedupeTerms: ['keratin', 'کراتین']
+  },
+  {
+    keywords: ['argan oil', 'روغن آرگان', 'ارگان'],
+    label: 'حاوی روغن آرگان برای کمک به نرمی، تغذیه و درخشندگی مو',
+    dedupeTerms: ['argan', 'آرگان', 'ارگان']
+  },
+  {
+    keywords: ['aloe vera', 'آلوئه ورا', 'آلوورا'],
+    label: 'حاوی آلوئه‌ورا برای کمک به آبرسانی و آرامش پوست یا مو',
+    dedupeTerms: ['aloe', 'آلوئه', 'آلوورا']
+  },
+  {
+    keywords: ['anti dandruff', 'anti-dandruff', 'ضد شوره', 'ضدشوره'],
+    label: 'کمک به کنترل شوره و کاهش پوسته‌ریزی پوست سر',
+    dedupeTerms: ['ضد شوره', 'ضدشوره', 'dandruff']
+  },
+  {
+    keywords: ['spf', 'ضد آفتاب', 'ضدآفتاب'],
+    label: 'دارای SPF برای کمک به محافظت از پوست در برابر آفتاب',
+    dedupeTerms: ['spf', 'ضد آفتاب', 'ضدآفتاب']
+  },
+];
+
+const stripHtmlTags = (html: string): string => String(html || '').replace(/<[^>]+>/g, ' ');
+
+const collectTrustedProductFacts = (data: any, productName: string, briefDescription: string): ProductFactRule[] => {
+  const trustedText = normalizeText([
+    productName,
+    briefDescription,
+    data?.correctedProductName,
+    data?.englishProductName,
+    data?.focusKeyword,
+    data?.seoTitle,
+  ].filter(Boolean).join(' '));
+
+  const facts: ProductFactRule[] = [];
+  for (const rule of PRODUCT_FACT_RULES) {
+    if (rule.keywords.some(keyword => trustedText.includes(normalizeText(keyword)))) {
+      facts.push(rule);
+    }
+  }
+
+  return facts.slice(0, 5);
+};
+
+const ensureTrustedFactsInDescription = (html: string, facts: ProductFactRule[]): string => {
+  if (!facts.length) return html;
+
+  let output = String(html || '');
+  const descriptionText = normalizeText(stripHtmlTags(output));
+  const missingFacts = facts.filter(rule => !rule.dedupeTerms.some(term => descriptionText.includes(normalizeText(term))));
+
+  if (!missingFacts.length) return output;
+
+  const items = missingFacts.map(rule => `<li>${rule.label}</li>`).join(' ');
+
+  // اولویت: اضافه شدن به بخش ویژگی‌های اصلی، بدون دست زدن به ساختار اصلی خروجی.
+  const featuresListRegex = /(<h5[^>]*>[^<]*(?:ویژگی|ویژگی‌های اصلی|مشخصات کلیدی)[^<]*<\/h5>\s*<ul[^>]*>)/i;
+  if (featuresListRegex.test(output)) {
+    return output.replace(featuresListRegex, `$1 ${items}`);
+  }
+
+  // اگر بخش ویژگی‌ها نبود، بعد از مقدمه یک بخش کوتاه و تمیز اضافه می‌شود.
+  const factSection = `<hr />
+<h5>✅ ویژگی‌های واقعی محصول:</h5>
+<ul>${items}</ul>
+`;
+  if (/<p[^>]*>[\s\S]*?<\/p>/i.test(output)) {
+    return output.replace(/(<p[^>]*>[\s\S]*?<\/p>)/i, `$1
+${factSection}`);
+  }
+
+  return `${factSection}${output}`;
+};
+
+
 const normalizeGeneratedProductData = (value: any, productName: string): any => {
   const data = value && typeof value === 'object' ? value : {};
   const analysis = data.advancedSeoAnalysis && typeof data.advancedSeoAnalysis === 'object'
@@ -992,7 +1125,8 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
     
     let userPrompt = `بر اساس اطلاعات زیر، محتوای صفحه محصول را تولید کن:
 - نام محصول: "${productName}"
-- قانون نام محصول: نام محصول را کمی کامل‌تر و فروشگاهی بنویس؛ نوع محصول، برند و یک ویژگی مهم را بیاور. حجم/وزن/تعداد مثل ml، oz، گرم یا عددی را فقط اگر در تصویر واضح است یا کاربر نوشته حفظ کن؛ هرگز حدس نزن. اگر دو واحد معادل مثل 353ml و 353 میلی‌لیتر دیده شد، فقط یکی را بنویس. نام محصول خیلی بلند، تبلیغاتی یا جمله‌ای نشود.
+- قانون نام محصول: نام محصول را کمی کامل‌تر و فروشگاهی بنویس؛ نوع محصول، برند و یک ویژگی مهم را بیاور. حجم/وزن/تعداد فقط اگر در تصویر واضح است یا کاربر نوشته حفظ کن؛ هرگز حدس نزن. در نام فارسی محصول، ml را به «میلی‌لیتر» تبدیل کن و هرگز کنار آن شکل انگلیسی را تکرار نکن. اگر دو واحد معادل مثل 353ml و 353 میلی‌لیتر دیده شد، فقط «353 میلی‌لیتر» را نگه دار. نام محصول خیلی بلند، تبلیغاتی یا جمله‌ای نشود.
+- قانون ویژگی واقعی: کلمات مهم داخل نام محصول را حتماً در توضیحات کامل توضیح بده؛ مثلاً Coconut Oil یعنی روغن نارگیل، Shine & Hold یعنی درخشندگی و حفظ حالت، Mist یعنی میست/اسپری سبک، Shea Butter یعنی شی باتر. فقط توضیح عمومی درباره دسته محصول ننویس.
 - هشدار مهم: لینک داخلی، کلیک کنید یا مشاهده دسته‌بندی داخل متن ننویس. لینک داخلی فقط بعد از تولید متن توسط سیستم اضافه می‌شود.
 - هشدار مهم دسته‌بندی: هایپرمارکت فقط مخصوص خوراکی‌ها و محصولات سوپرمارکتی است. اگر محصول آرایشی، بهداشتی، شامپو، عطر، پوست یا مو بود، به هیچ عنوان هایپرمارکت را داخل متن نیاور.`;
     if (briefDescription) {
@@ -1053,6 +1187,9 @@ export default async function handler(req: VercelRequest, res: VercelResponse) {
       briefDescription,
       Boolean(productImage)
     );
+    const trustedFacts = collectTrustedProductFacts(generatedData, productName, briefDescription);
+    generatedData.fullDescription = ensureTrustedFactsInDescription(generatedData.fullDescription, trustedFacts);
+
     const selectedCategory = pickInternalCategory(generatedData, productName, briefDescription, isNutsOrDriedFruit);
 
     // اول تمام لینک‌ها و جمله‌های لینک‌سازی مدل حذف می‌شود. مدل حق ندارد خودش هایپرمارکت یا دسته‌بندی بسازد.
